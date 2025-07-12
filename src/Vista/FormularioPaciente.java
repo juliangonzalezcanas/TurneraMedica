@@ -39,6 +39,7 @@ public class FormularioPaciente extends JPanel {
 	private JTextField email;
 	private JTextField obra_social;
 	private JTextField id;
+	private JTextField passwd;
 
 	private JTextField idM;
 
@@ -69,6 +70,8 @@ public class FormularioPaciente extends JPanel {
 		email = new JTextField();
 		obra_social = new JTextField();
 		id = new JTextField();
+		passwd = new JTextField();
+
 		idM = new JTextField();
 
 		idE = new JTextField();
@@ -111,6 +114,7 @@ public class FormularioPaciente extends JPanel {
 		JLabel emailLbl = new JLabel("Email ");
 		JLabel obra_socialLbl = new JLabel("Obra social ");
 		JLabel idLbl = new JLabel("Id ");
+		JLabel passwdLbl = new JLabel("Contraseña ");
 		
 		
 		panel.setLayout(new FlowLayout());
@@ -127,6 +131,8 @@ public class FormularioPaciente extends JPanel {
 		panel.add(email);
 		panel.add(obra_socialLbl);
 		panel.add(obra_social);
+		panel.add(passwdLbl);
+		panel.add(passwd);
 		
 
 
@@ -150,6 +156,7 @@ public class FormularioPaciente extends JPanel {
 					dni.setText(paciente.getDni().toString());
 					email.setText(paciente.getEmail());
 					obra_social.setText(paciente.getObraSocial());
+					passwd.setText(paciente.getPassword());
 
 					panel.revalidate();
 					panel.repaint();
@@ -294,7 +301,7 @@ public class FormularioPaciente extends JPanel {
 			try {
 				validarCampos();
 				Paciente p = new Paciente( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
+					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), passwd.getText());
 				pacienteServicio.grabar(p);
 
 				JOptionPane.showMessageDialog(this, "Paciente agregado correctamente", 

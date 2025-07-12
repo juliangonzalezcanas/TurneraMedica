@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import Entidades.Paciente;
 import Entidades.Turno;
 import Persistencia.ICrud;
 import Persistencia.DB.PacienteDBDao;
 import Servicios.Exceptions.EliminandoPacienteException;
 import Servicios.Exceptions.GrabandoPacienteException;
+import Servicios.Exceptions.LoginExcepcion;
 import Servicios.Exceptions.ModificandoPacienteException;
 
 public class PacienteServicio {
@@ -41,9 +44,14 @@ public class PacienteServicio {
         
     }
 
-    public int login(){
+    public int login(String email, String password) throws LoginExcepcion {
+        String hashedPasswd = BCrypt.hashpw(password, "salt");
+        int id = ((PacienteDBDao) persistencia).login(email, hashedPasswd);
+        if (id == -1) {
+            throw new LoginExcepcion();
+        }
         
-        return 0;
+        return id;
     }
 
     public List<Paciente> leerTodos(){

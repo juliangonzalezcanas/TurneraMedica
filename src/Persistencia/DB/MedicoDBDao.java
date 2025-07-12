@@ -63,6 +63,20 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 		return m;
 	}
 
+	public int login(String email, String password) {
+		String sql = "select id from MEDICO where mail = ? and password = ?";
+		int id = -1;
+		try {
+			ResultSet rs = super.selectSql(sql, email, password);
+			if (rs.first()) {
+				id = rs.getInt(1);
+			}
+			super.cerrarConexion();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return id;
+	}
 
 	@Override
 	public Medico leer(Integer id) throws IOException, ClassNotFoundException {

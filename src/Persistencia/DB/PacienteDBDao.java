@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import Entidades.Paciente;
 import Persistencia.ICrud;
 
@@ -35,8 +37,9 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	public void grabar(Paciente entity) {
 
 		String sql = "INSERT INTO PACIENTE (nombre, apellido, dni, mail, obra_social, password) VALUES (?,?,?,?,?,?)";
+		String hashedPasswd = BCrypt.hashpw(entity.getPassword(), "salt");
 		try {
-			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPassword());
+			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), hashedPasswd);
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -60,6 +63,21 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 		return p;
 	}
 
+
+	public int login(String email, String password) {
+		String sql = "select id from PACIENTE where mail = ? and password = ?";
+		int id = -1;
+		try {
+			ResultSet rs = super.selectSql(sql, email, password);
+			if (rs.first()) {
+				id = rs.getInt(1);
+			}
+			super.cerrarConexion();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return id;
+	}
 
 	@Override
 	public Paciente leer(Integer id) throws IOException, ClassNotFoundException {

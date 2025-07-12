@@ -13,6 +13,7 @@ import java.awt.GridLayout;
 
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
+import Servicios.Exceptions.LoginExcepcion;
 
 public class FormularioLogin extends JFrame {
 
@@ -63,14 +64,15 @@ public class FormularioLogin extends JFrame {
         boton.addActionListener( e -> {
 			try {
 				if(botonToggle.isSelected()) {
-                    pacienteServicio.login();
+                   int idPaciente = pacienteServicio.login(email.getText(), passwd.getText());
+                   JOptionPane.showMessageDialog(this, "Paciente logueado con ID: " + idPaciente, "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    medicoServicio.login();
+                    int idMedico = medicoServicio.login(email.getText(), passwd.getText());
+                    JOptionPane.showMessageDialog(this, "Paciente logueado con ID: " + idMedico, "Éxito", JOptionPane.INFORMATION_MESSAGE);
                     
                 }
-			} catch (Error e1){
-                JOptionPane.showMessageDialog(panel, "Error al iniciar sesión: " + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-
+			} catch (LoginExcepcion e1) {
+                JOptionPane.showMessageDialog(this, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
 		});
 

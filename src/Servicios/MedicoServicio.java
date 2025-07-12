@@ -6,11 +6,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import Entidades.Medico;
 import Entidades.Turno;
 import Persistencia.ICrud;
 import Persistencia.DB.MedicoDBDao;
+import Persistencia.DB.PacienteDBDao;
 import Servicios.Exceptions.GrabandoPacienteException;
+import Servicios.Exceptions.LoginExcepcion;
 
 public class MedicoServicio {
     ICrud<Medico> persistencia;
@@ -36,6 +40,16 @@ public class MedicoServicio {
         return 0;
     }
     
+    public int login(String email, String password) throws LoginExcepcion {
+        String hashedPasswd = BCrypt.hashpw(password, "salt");
+        int id = ((MedicoDBDao) persistencia).login(email, hashedPasswd);
+        if (id == -1) {
+            throw new LoginExcepcion();
+        }
+        
+        return id;
+    }
+
     public void modificar(Medico m) {
         persistencia.modificar(m);
     }
