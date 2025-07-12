@@ -19,10 +19,8 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import Entidades.Medico;
-import Entidades.Paciente;
 import Entidades.Turno;
 import Servicios.MedicoServicio;
-import Servicios.PacienteServicio;
 import Servicios.TurnoServicio;
 import Servicios.Exceptions.GrabandoPacienteException;
 import Vista.Exceptions.ApellidoVacioException;
@@ -259,7 +257,7 @@ public class FormularioMedico extends JPanel {
 			try {
 				validarCampos();
 				Medico m = new Medico( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), Float.valueOf(precio_consulta.getText()), especialidad.getText());
+					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), Float.valueOf(precio_consulta.getText()), especialidad.getText(), "");
 				medicoServicio.modificar(m);
 				JOptionPane.showMessageDialog(this, "Medico modificado", 
 					"Campo vacio", JOptionPane.YES_OPTION);
@@ -373,7 +371,7 @@ public class FormularioMedico extends JPanel {
 			try {
 				validarCampos();
 				Medico m = new Medico(Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), Float.valueOf(precio_consulta.getText()), especialidad.getText());
+					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), Float.valueOf(precio_consulta.getText()), especialidad.getText(), "");
 				medicoServicio.grabar(m);
 			} catch (NombreVacioException e1) {
 				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío", 

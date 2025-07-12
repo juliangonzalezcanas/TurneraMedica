@@ -97,7 +97,7 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
         String sql = "select * from MEDICO where id = ?";
         ResultSet rs = super.selectSql(sql, id);
         if (rs.first()) {
-            return new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8));
+            return new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8), rs.getString(9));
         }
 		super.cerrarConexion();
         return null;
@@ -107,7 +107,7 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
         String sql = "select * from PACIENTE where id = ?";
         ResultSet rs = super.selectSql(sql, id);
         if (rs.first()) {
-			Paciente p = new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6));
+			Paciente p = new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getString(7));
 			super.cerrarConexion();
             return p;
         }

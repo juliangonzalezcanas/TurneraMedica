@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Paciente extends Usuario{
 
-    public Paciente(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial) {
-        super(id, nombre, apellido, dni, email, obraSocial);
+    public Paciente(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial, String password) {
+        super(id, nombre, apellido, dni, email, obraSocial, password);
         
     }
 

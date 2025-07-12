@@ -41,6 +41,11 @@ public class PacienteServicio {
         
     }
 
+    public int login(){
+        
+        return 0;
+    }
+
     public List<Paciente> leerTodos(){
         return persistencia.leerTodos();
     }

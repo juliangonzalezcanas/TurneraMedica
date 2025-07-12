@@ -36,9 +36,9 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 	@Override
 	public void grabar(Medico entity) {
 
-		String sql = "INSERT INTO MEDICO VALUES (?,?,?,?,?,?,?, ?)";
+		String sql = "INSERT INTO MEDICO (nombre, apellido, dni, mail, obra_social, precio_cosulta, especialidad, password) VALUES (?,?,?,?,?,?,?,?)";
 		try {
-			updateDeleteInsertSql(sql, entity.getId(), entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPrecioConsulta(), entity.getEspecialidad());
+			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPrecioConsulta(), entity.getEspecialidad(), entity.getPassword());
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -54,7 +54,7 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 			
 
 			while (rs.next()) {
-				m.add(new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8)));
+				m.add(new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8), rs.getString(9)));
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
@@ -72,7 +72,7 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 		try {
 			ResultSet rs = super.selectSql(sql, id);
 			if (rs.first()) {
-				return new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8));
+				return new Medico(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getFloat(7), rs.getString(8), rs.getString(9));
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {

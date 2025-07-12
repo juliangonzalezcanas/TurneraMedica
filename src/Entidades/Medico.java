@@ -8,8 +8,8 @@ public class Medico extends Usuario{
     private String especialidad;
 
 
-    public Medico(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial, Float precioConsulta, String especialidad) {
-        super(id, nombre, apellido, dni, email, obraSocial);
+    public Medico(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial, Float precioConsulta, String especialidad, String password) {
+        super(id, nombre, apellido, dni, email, obraSocial, password);
         this.precioConsulta = precioConsulta;
         this.especialidad = especialidad;
         

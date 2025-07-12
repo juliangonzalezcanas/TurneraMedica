@@ -9,8 +9,9 @@ public abstract class Usuario {
     private String email;
     private ArrayList<Turno> turnos;
     private String obraSocial;
+    private String password;
 
-    public Usuario(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial) {
+    public Usuario(Integer id, String nombre, String apellido, Integer dni, String email, String obraSocial, String password) {
         
         this.id = id;
         this.nombre = nombre;
@@ -19,6 +20,7 @@ public abstract class Usuario {
         this.email = email;
         this.turnos = new ArrayList<>();
         this.obraSocial = obraSocial;
+        this.password = password;
 
     }
 
@@ -82,5 +84,13 @@ public abstract class Usuario {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

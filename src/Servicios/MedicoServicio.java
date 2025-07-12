@@ -31,7 +31,11 @@ public class MedicoServicio {
             throw new GrabandoPacienteException(); 
         }
     }
-
+    public int login(){
+        
+        return 0;
+    }
+    
     public void modificar(Medico m) {
         persistencia.modificar(m);
     }

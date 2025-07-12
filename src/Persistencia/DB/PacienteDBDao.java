@@ -34,9 +34,9 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	@Override
 	public void grabar(Paciente entity) {
 
-		String sql = "INSERT INTO PACIENTE VALUES (?,?,?,?,?,?)";
+		String sql = "INSERT INTO PACIENTE (nombre, apellido, dni, mail, obra_social, password) VALUES (?,?,?,?,?,?)";
 		try {
-			updateDeleteInsertSql(sql, entity.getId(), entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial());
+			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPassword());
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -50,7 +50,7 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 		try {
 			ResultSet rs = super.selectSql(sql);
 			while (rs.next()) {
-				p.add(new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6)));
+				p.add(new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getString(7)));
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
@@ -69,7 +69,7 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 		try {
 			ResultSet rs = super.selectSql(sql, id);
 			if (rs.first()) {
-				Paciente p = new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6));
+				Paciente p = new Paciente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getString(7));
 				super.cerrarConexion();
 				return p;
 			}

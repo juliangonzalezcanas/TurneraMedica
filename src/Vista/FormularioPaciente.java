@@ -248,7 +248,7 @@ public class FormularioPaciente extends JPanel {
 			try {
 				validarCampos();
 				Paciente p = new Paciente( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText());
+					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
 				pacienteServicio.modificar(p);
 
 				JOptionPane.showMessageDialog(this, "Paciente modificado correctamente", 
@@ -294,7 +294,7 @@ public class FormularioPaciente extends JPanel {
 			try {
 				validarCampos();
 				Paciente p = new Paciente( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText());
+					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
 				pacienteServicio.grabar(p);
 
 				JOptionPane.showMessageDialog(this, "Paciente agregado correctamente", 
