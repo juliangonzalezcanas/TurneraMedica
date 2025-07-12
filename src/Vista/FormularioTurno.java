@@ -2,11 +2,9 @@ package Vista;
 
 import java.awt.GridLayout;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -19,6 +17,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 
 import Entidades.Medico;
+import Entidades.Paciente;
 import Entidades.Turno;
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
@@ -37,9 +36,13 @@ public class FormularioTurno extends JPanel{
 
 	private JTextField idE;
 
-    private JComboBox<Medico> comboMedico;
+    private JComboBox comboEntidad;
 
     private JComboBox<String> comboHorarios;
+
+    private int idUsuario;
+    private boolean esPaciente;
+
     
 
 	
@@ -47,11 +50,14 @@ public class FormularioTurno extends JPanel{
     private MedicoServicio medicoServicio;
     private PacienteServicio pacienteServicio;
 
-    public FormularioTurno() {
+    public FormularioTurno(boolean esPaciente, int idUsuario) {
 
         setLayout(new GridLayout(5,2));
         add(new JLabel("Gestión de Turnos", SwingConstants.CENTER));
 		crearBotonSwitch();
+
+        this.esPaciente = esPaciente;
+        this.idUsuario = idUsuario;
 
 		fecha = new JTextField();
 
@@ -80,8 +86,8 @@ public class FormularioTurno extends JPanel{
         JLabel medicoLbl = new JLabel("Medico ");
         JLabel turnoLbl = new JLabel("Horarios Disponibles:");
 
-        comboMedico = new JComboBox<>();
-        cargarMedicos();
+        comboEntidad = new JComboBox<>();
+        cargarEntidades();
 
         comboHorarios = new JComboBox<>();
 		
@@ -94,7 +100,7 @@ public class FormularioTurno extends JPanel{
         panel.add(fechaLbl);
         panel.add(fecha);
         panel.add(medicoLbl);
-        panel.add(comboMedico);
+        panel.add(comboEntidad);
         panel.add(turnoLbl);
         panel.add(comboHorarios);
 		
@@ -105,17 +111,20 @@ public class FormularioTurno extends JPanel{
 		this.add(panel);
     }
 
-    private void cargarMedicos() {
-        List<Medico> medicos = medicoServicio.leerTodos();
-        for (Medico medico : medicos) {
-            comboMedico.addItem(medico);
+    private void cargarEntidades() {
+        if (!esPaciente) {
+            List<Medico> medicos = medicoServicio.leerTodos();
+            for (Medico m : medicos) comboEntidad.addItem(m);
+        } else {
+            List<Paciente> pacientes = pacienteServicio.leerTodos();
+            for (Paciente p : pacientes) comboEntidad.addItem(p);
         }
     }
     
 
     private void cargarHorarios() throws MedicoVacioException, SQLException{
         comboHorarios.removeAllItems();
-        Medico medico = (Medico) comboMedico.getSelectedItem();
+        Medico medico = (Medico) comboEntidad.getSelectedItem();
         if (medico == null) {
             throw new MedicoVacioException();
         } else {
@@ -191,10 +200,17 @@ public class FormularioTurno extends JPanel{
             try {
                 String seleccionado = (String) comboHorarios.getSelectedItem();
                 LocalDateTime horarioSeleccionado = LocalDateTime.parse(seleccionado, formatter);
-                Medico m = (Medico) comboMedico.getSelectedItem();
+                Turno t;
+                if (!esPaciente) {
+                    Medico m = (Medico) comboEntidad.getSelectedItem();
+                    Paciente p = pacienteServicio.leer(idUsuario);
+                    t = new Turno(Integer.parseInt(id.getText()), horarioSeleccionado, m, p);
+                } else {
+                    Paciente p = (Paciente) comboEntidad.getSelectedItem();
+                    Medico m = medicoServicio.leerPorId(idUsuario);
+                    t = new Turno(Integer.parseInt(id.getText()), horarioSeleccionado, m, p);
+                }
 
-                Turno t = new Turno(Integer.parseInt(id.getText()), horarioSeleccionado, m, pacienteServicio.leer(1));
-                turnoServicio.grabar(t);
 
                 JOptionPane.showMessageDialog(this, "Turno agregado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 

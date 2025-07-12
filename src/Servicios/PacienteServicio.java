@@ -39,6 +39,8 @@ public class PacienteServicio {
 
     public void modificar(Paciente p) throws ModificandoPacienteException {
         try {
+            String hashedPasswd = BCrypt.hashpw(p.getPassword(), BCrypt.gensalt());
+            p.setPassword(hashedPasswd);
             persistencia.modificar(p);
         } catch (Exception e) {
             throw new ModificandoPacienteException();

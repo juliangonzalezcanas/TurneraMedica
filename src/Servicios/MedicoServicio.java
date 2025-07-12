@@ -12,7 +12,6 @@ import Entidades.Medico;
 import Entidades.Turno;
 import Persistencia.ICrud;
 import Persistencia.DB.MedicoDBDao;
-import Persistencia.DB.PacienteDBDao;
 import Servicios.Exceptions.GrabandoPacienteException;
 import Servicios.Exceptions.LoginExcepcion;
 
@@ -29,6 +28,8 @@ public class MedicoServicio {
 
     public void grabar(Medico m) throws IOException, GrabandoPacienteException {
         try{
+            String hashedPasswd = BCrypt.hashpw(m.getPassword(), BCrypt.gensalt());
+            m.setPassword(hashedPasswd);
             persistencia.grabar(m);
             
         } catch (IOException e) {
@@ -41,9 +42,10 @@ public class MedicoServicio {
     }
     
     public int login(String email, String password) throws LoginExcepcion {
-        String hashedPasswd = BCrypt.hashpw(password, "salt");
-        int id = ((MedicoDBDao) persistencia).login(email, hashedPasswd);
-        if (id == -1) {
+
+        Object[] info = ((MedicoDBDao) persistencia).login(email);
+        int id = (int) info[0];
+        if (!BCrypt.checkpw(password, (String) info[1])) {
             throw new LoginExcepcion();
         }
         
@@ -51,6 +53,8 @@ public class MedicoServicio {
     }
 
     public void modificar(Medico m) {
+        String hashedPasswd = BCrypt.hashpw(m.getPassword(), BCrypt.gensalt());
+        m.setPassword(hashedPasswd);
         persistencia.modificar(m);
     }
 

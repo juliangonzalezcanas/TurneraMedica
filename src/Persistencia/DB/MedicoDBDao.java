@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Entidades.Medico;
-import Entidades.Paciente;
 import Persistencia.ICrud;
 
 public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
@@ -18,7 +17,7 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
     
     @Override
 	public void modificar(Medico m) {
-		String sql = "update MEDICO set nombre=?, apellido=?, dni=?, mail=?, obra_social=?, precio_consulta=? where id = ? ";
+		String sql = "update MEDICO set nombre=?, apellido=?, dni=?, mail=?, obra_social=?, precio_consulta=?, especialidad=?, password=? where id = ? ";
 		try {
 			updateDeleteInsertSql(sql,m.getNombre(), 
 					m.getApellido(), 
@@ -26,6 +25,8 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 					m.getEmail(),
 					m.getObraSocial(), 
                     m.getPrecioConsulta(),
+					m.getEspecialidad(),
+					m.getPassword(),
 					m.getId());
 			super.cerrarConexion();
 		} catch (SQLException e) {
@@ -36,7 +37,7 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 	@Override
 	public void grabar(Medico entity) {
 
-		String sql = "INSERT INTO MEDICO (nombre, apellido, dni, mail, obra_social, precio_cosulta, especialidad, password) VALUES (?,?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO MEDICO (nombre, apellido, dni, mail, obra_social, precio_consulta, especialidad, password) VALUES (?,?,?,?,?,?,?,?)";
 		try {
 			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPrecioConsulta(), entity.getEspecialidad(), entity.getPassword());
 			super.cerrarConexion();
@@ -63,19 +64,21 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 		return m;
 	}
 
-	public int login(String email, String password) {
-		String sql = "select id from MEDICO where mail = ? and password = ?";
+	public Object[] login(String email) {
+		String sql = "select id, password from MEDICO where mail = ?";
 		int id = -1;
+		String password = null;
 		try {
-			ResultSet rs = super.selectSql(sql, email, password);
+			ResultSet rs = super.selectSql(sql, email);
 			if (rs.first()) {
 				id = rs.getInt(1);
+				password = rs.getString(2);
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return id;
+		return  new Object[] {id, password};
 	}
 
 	@Override

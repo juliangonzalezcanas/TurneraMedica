@@ -14,6 +14,13 @@ public class Medico extends Usuario{
         this.especialidad = especialidad;
         
     }
+
+    public Medico(String nombre, String apellido, Integer dni, String email, String obraSocial, Float precioConsulta, String especialidad, String password) {
+        super(null, nombre, apellido, dni, email, obraSocial, password);
+        this.precioConsulta = precioConsulta;
+        this.especialidad = especialidad;
+        
+    }
     
 
     public Float getPrecioConsulta() {

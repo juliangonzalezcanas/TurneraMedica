@@ -10,7 +10,6 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import java.awt.GridLayout;
 
-
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
 import Servicios.Exceptions.LoginExcepcion;
@@ -64,17 +63,31 @@ public class FormularioLogin extends JFrame {
         boton.addActionListener( e -> {
 			try {
 				if(botonToggle.isSelected()) {
-                   int idPaciente = pacienteServicio.login(email.getText(), passwd.getText());
-                   JOptionPane.showMessageDialog(this, "Paciente logueado con ID: " + idPaciente, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    int idPaciente = pacienteServicio.login(email.getText(), passwd.getText());
+                    MenuPaciente menu = new MenuPaciente(idPaciente);
+                    menu.setVisible(true);
+                    this.dispose();
+                   
                 } else {
                     int idMedico = medicoServicio.login(email.getText(), passwd.getText());
-                    JOptionPane.showMessageDialog(this, "Paciente logueado con ID: " + idMedico, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    MenuMedico menu = new MenuMedico(idMedico);
+                    menu.setVisible(true);
+                    this.dispose();
                     
                 }
 			} catch (LoginExcepcion e1) {
                 JOptionPane.showMessageDialog(this, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
 		});
+
+        JButton botonRegistro = new JButton("Registrarse");
+
+        botonRegistro.addActionListener(e -> {
+            new FormularioRegistro(); // abre ventana nueva
+        });
+
+        panel.add(botonRegistro);
+
 
         this.add(panel);
         panel.add(boton);

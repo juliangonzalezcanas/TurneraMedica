@@ -21,7 +21,6 @@ import Entidades.Turno;
 import Servicios.PacienteServicio;
 import Servicios.TurnoServicio;
 import Servicios.Exceptions.EliminandoPacienteException;
-import Servicios.Exceptions.GrabandoPacienteException;
 import Servicios.Exceptions.ModificandoPacienteException;
 import Vista.Exceptions.ApellidoVacioException;
 import Vista.Exceptions.DniVacioException;
@@ -32,35 +31,25 @@ import Vista.Exceptions.ObraSocialVaciaException;
 
 public class FormularioPaciente extends JPanel {
 
-
-	private JTextField nombre;
-	private JTextField apellido;
-	private JTextField dni;
-	private JTextField email;
-	private JTextField obra_social;
-	private JTextField passwd;
-
-	private JTextField idM;
-
-	private JTextField idE;
-
-	private JTextField idT;
+	private JTextField nombre, apellido, dni, email, obra_social, passwd;
 
 	private JTable tablaPacientes;
 	
 	private PacienteServicio pacienteServicio;
 	private TurnoServicio turnoServicio;
+
+	private int idPaciente;
 	
 
 
-
-	public FormularioPaciente() {
+	public FormularioPaciente(int idPaciente) {
 
 		
 		setLayout(new GridLayout(6,2));
         add(new JLabel("Gestión de Pacientes", SwingConstants.CENTER));
 		crearBotonSwitch();
 		
+		this.idPaciente = idPaciente;
 		
 
 		nombre = new JTextField();
@@ -69,12 +58,6 @@ public class FormularioPaciente extends JPanel {
 		email = new JTextField();
 		obra_social = new JTextField();
 		passwd = new JTextField();
-
-		idM = new JTextField();
-
-		idE = new JTextField();
-
-		idT = new JTextField();
 
 		tablaPacientes = new JTable();
 
@@ -85,7 +68,6 @@ public class FormularioPaciente extends JPanel {
 		
 
 		createPaneAgregar();
-		crearBotonAceptar();
 
 		crearBotonLlenarCampos();
 		crearBotonModificar();
@@ -111,7 +93,6 @@ public class FormularioPaciente extends JPanel {
 		JLabel dniLbl = new JLabel("Dni ");
 		JLabel emailLbl = new JLabel("Email ");
 		JLabel obra_socialLbl = new JLabel("Obra social ");
-		JLabel idLbl = new JLabel("Id ");
 		JLabel passwdLbl = new JLabel("Contraseña ");
 		
 		
@@ -140,18 +121,15 @@ public class FormularioPaciente extends JPanel {
 		JPanel panel = new JPanel();
 		JButton boton = new JButton("Llenar campos");
 
-		panel.add(new JLabel("Interte su id"));
-		panel.add(idM);
 		boton.addActionListener(e ->{
 			try {
-        		Paciente paciente = pacienteServicio.leer(Integer.parseInt(idM.getText())); 
+        		Paciente paciente = pacienteServicio.leer(idPaciente); 
 				if(paciente != null){
 					nombre.setText(paciente.getNombre());
 					apellido.setText(paciente.getApellido());
 					dni.setText(paciente.getDni().toString());
 					email.setText(paciente.getEmail());
 					obra_social.setText(paciente.getObraSocial());
-					passwd.setText(paciente.getPassword());
 
 					panel.revalidate();
 					panel.repaint();
@@ -178,13 +156,10 @@ public class FormularioPaciente extends JPanel {
 
 		JLabel titulo = new JLabel("Eliminar Paciente");
 		
-		JLabel idLbl = new JLabel("Id ");
 		
 		panel.setLayout(new GridLayout(3, 2));
 		panel.add(titulo);
-		panel.add(idLbl);
-		panel.add(idE);
-
+	
 		this.add(panel);
 	}
 
@@ -219,17 +194,9 @@ public class FormularioPaciente extends JPanel {
 		
 		boton.addActionListener( e -> {
 			try {
-				if(idE.getText().isEmpty()) {
-					throw new IdVacioException();
-				} else {
-					pacienteServicio.eliminar(Integer.valueOf(idE.getText()));
-
-					JOptionPane.showMessageDialog(this, "Paciente eliminado correctamente", 
-						"Éxito", JOptionPane.INFORMATION_MESSAGE);
-				}
-			} catch (IdVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El id no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
+				pacienteServicio.eliminar(idPaciente);
+				JOptionPane.showMessageDialog(this, "Paciente eliminado correctamente", 
+					"Éxito", JOptionPane.INFORMATION_MESSAGE);
 			} catch (EliminandoPacienteException e1) {
 				JOptionPane.showMessageDialog(this, "Error al eliminar el paciente", 
 					"Error", JOptionPane.ERROR_MESSAGE);
@@ -249,7 +216,7 @@ public class FormularioPaciente extends JPanel {
 		boton.addActionListener( e -> {
 			try {
 				validarCampos();
-				Paciente p = new Paciente(null, nombre.getText(), apellido.getText(), 
+				Paciente p = new Paciente(idPaciente, nombre.getText(), apellido.getText(), 
 					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
 				pacienteServicio.modificar(p);
 
@@ -287,52 +254,6 @@ public class FormularioPaciente extends JPanel {
 		this.add(panel);
 	}
 	
-	private void crearBotonAceptar() {
-
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Aceptar");
-
-		boton.addActionListener( e -> {
-			try {
-				validarCampos();
-				Paciente p = new Paciente( nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), passwd.getText());
-				pacienteServicio.grabar(p);
-
-				JOptionPane.showMessageDialog(this, "Paciente agregado correctamente", 
-					"Éxito", JOptionPane.INFORMATION_MESSAGE);
-				
-				
-
-			} catch (NombreVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (ApellidoVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El apellido no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (DniVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El dni no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (EmailVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El email no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (ObraSocialVaciaException e1) {
-				JOptionPane.showMessageDialog(this, "La obra social no puede estar vacía", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (GrabandoPacienteException e1) {
-				JOptionPane.showMessageDialog(this, "El dni ingresado ya existe tiene cuenta", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (IdVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El id no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
-		panel.add(boton);
-		this.add(panel);
-	}
 
 	private void crearBotonSwitch(){
 
@@ -361,15 +282,11 @@ public class FormularioPaciente extends JPanel {
 	private void paneBuscarTurnos(){
 		JPanel panel = new JPanel();
 		JToggleButton boton = new JToggleButton("Buscar Turnos");
-		JLabel idLbl = new JLabel("Id Paciente ");
-
-		panel.add(idLbl);
-		panel.add(idT);
 
 
 		boton.addActionListener(e -> {
 			try {
-				List<Turno> turnosPaciente = turnoServicio.buscarPorPaciente(Integer.valueOf(idT.getText()));
+				List<Turno> turnosPaciente = turnoServicio.buscarPorPaciente(idPaciente);
 				List<Turno> turnosPorFecha = pacienteServicio.buscarTurnosPorFecha(turnosPaciente, java.time.LocalDate.now());
 				for(Turno t: turnosPorFecha){
 					panel.add(new JLabel("Turno: " + t.getId() + ", Medico: " + t.getMedico() + " - Fecha: " + t.getFecha().toLocalDate() + " - Hora: " + t.getFecha().toLocalTime()));
