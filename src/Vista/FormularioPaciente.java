@@ -38,7 +38,6 @@ public class FormularioPaciente extends JPanel {
 	private JTextField dni;
 	private JTextField email;
 	private JTextField obra_social;
-	private JTextField id;
 	private JTextField passwd;
 
 	private JTextField idM;
@@ -69,7 +68,6 @@ public class FormularioPaciente extends JPanel {
 		dni = new JTextField();
 		email = new JTextField();
 		obra_social = new JTextField();
-		id = new JTextField();
 		passwd = new JTextField();
 
 		idM = new JTextField();
@@ -119,8 +117,6 @@ public class FormularioPaciente extends JPanel {
 		
 		panel.setLayout(new FlowLayout());
 		panel.add(titulo);
-		panel.add(idLbl);
-		panel.add(id);
 		panel.add(nombreLbl);
 		panel.add(nombre);
 		panel.add(apellidoLbl);
@@ -150,7 +146,6 @@ public class FormularioPaciente extends JPanel {
 			try {
         		Paciente paciente = pacienteServicio.leer(Integer.parseInt(idM.getText())); 
 				if(paciente != null){
-					id.setText(paciente.getId().toString());
 					nombre.setText(paciente.getNombre());
 					apellido.setText(paciente.getApellido());
 					dni.setText(paciente.getDni().toString());
@@ -254,7 +249,7 @@ public class FormularioPaciente extends JPanel {
 		boton.addActionListener( e -> {
 			try {
 				validarCampos();
-				Paciente p = new Paciente( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
+				Paciente p = new Paciente(null, nombre.getText(), apellido.getText(), 
 					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
 				pacienteServicio.modificar(p);
 
@@ -300,7 +295,7 @@ public class FormularioPaciente extends JPanel {
 		boton.addActionListener( e -> {
 			try {
 				validarCampos();
-				Paciente p = new Paciente( Integer.valueOf(id.getText()), nombre.getText(), apellido.getText(), 
+				Paciente p = new Paciente( nombre.getText(), apellido.getText(), 
 					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), passwd.getText());
 				pacienteServicio.grabar(p);
 
@@ -403,8 +398,6 @@ public class FormularioPaciente extends JPanel {
 			throw new EmailVacioException();
 		if (obra_social.getText().isEmpty())
 			throw new ObraSocialVaciaException();
-		if (id.getText().isEmpty())
-			throw new IdVacioException();
 		return true;
 	}
 

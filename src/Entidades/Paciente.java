@@ -9,6 +9,11 @@ public class Paciente extends Usuario{
         
     }
 
+    public Paciente(String nombre, String apellido, Integer dni, String email, String obraSocial, String password) {
+        super(null, nombre, apellido, dni, email, obraSocial, password);
+        
+    }
+
     public ArrayList<Turno> getTurnosPendientes() {
         ArrayList<Turno> turnosPendientes = new ArrayList<>();
         for (Turno t : super.getTurnos()) {

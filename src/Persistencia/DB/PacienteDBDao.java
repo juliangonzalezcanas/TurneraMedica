@@ -37,9 +37,9 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	public void grabar(Paciente entity) {
 
 		String sql = "INSERT INTO PACIENTE (nombre, apellido, dni, mail, obra_social, password) VALUES (?,?,?,?,?,?)";
-		String hashedPasswd = BCrypt.hashpw(entity.getPassword(), "salt");
+		
 		try {
-			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), hashedPasswd);
+			updateDeleteInsertSql(sql, entity.getNombre(), entity.getApellido(), entity.getDni(), entity.getEmail(), entity.getObraSocial(), entity.getPassword());
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -64,19 +64,21 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	}
 
 
-	public int login(String email, String password) {
-		String sql = "select id from PACIENTE where mail = ? and password = ?";
+	public Object[] login(String email) {
+		String sql = "select id, password from PACIENTE where mail = ?";
 		int id = -1;
+		String password = null;
 		try {
-			ResultSet rs = super.selectSql(sql, email, password);
+			ResultSet rs = super.selectSql(sql, email);
 			if (rs.first()) {
 				id = rs.getInt(1);
+				password = rs.getString(2);
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return id;
+		return  new Object[] {id, password};
 	}
 
 	@Override

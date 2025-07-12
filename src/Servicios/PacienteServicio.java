@@ -29,6 +29,8 @@ public class PacienteServicio {
 
     public void grabar(Paciente p) throws IOException, GrabandoPacienteException {
         try{
+            String hashedPasswd = BCrypt.hashpw(p.getPassword(), BCrypt.gensalt());
+            p.setPassword(hashedPasswd);
             persistencia.grabar(p);
         } catch (IOException e) {
             throw new GrabandoPacienteException(); 
@@ -45,9 +47,9 @@ public class PacienteServicio {
     }
 
     public int login(String email, String password) throws LoginExcepcion {
-        String hashedPasswd = BCrypt.hashpw(password, "salt");
-        int id = ((PacienteDBDao) persistencia).login(email, hashedPasswd);
-        if (id == -1) {
+        Object[] info = ((PacienteDBDao) persistencia).login(email);
+        int id = (int) info[0];
+        if (!BCrypt.checkpw(password, (String) info[1])) {
             throw new LoginExcepcion();
         }
         
