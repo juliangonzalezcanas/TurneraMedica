@@ -37,9 +37,9 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 	@Override
 	public void grabar(Turno entity) {
 
-		String sql = "INSERT INTO TURNO VALUES (?,?,?,?,?)";
+		String sql = "INSERT INTO TURNO (fecha, valor_final, medico_id, paciente_id) VALUES (?,?,?,?)";
 		try {
-			updateDeleteInsertSql(sql, entity.getId(), entity.getFecha(), entity.getPrecioConsulta(), entity.getMedico().getId(), entity.getPaciente().getId());
+			updateDeleteInsertSql(sql, entity.getFecha(), entity.getPrecioConsulta(), entity.getMedico().getId(), entity.getPaciente().getId());
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();

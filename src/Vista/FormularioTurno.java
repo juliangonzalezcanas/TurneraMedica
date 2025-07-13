@@ -28,13 +28,11 @@ public class FormularioTurno extends JPanel{
 
     private JTextField fecha;
 
-	private JTextField id;
+
 
     private JTextField fechaM;
 	private JTextField medicoM;
-	private JTextField idM;
 
-	private JTextField idE;
 
     private JComboBox comboEntidad;
 
@@ -60,15 +58,10 @@ public class FormularioTurno extends JPanel{
         this.idUsuario = idUsuario;
 
 		fecha = new JTextField();
-
-		id = new JTextField();
 		
 
 		fechaM = new JTextField();
 		medicoM = new JTextField();
-		idM = new JTextField();
-
-		idE = new JTextField();
 
 		turnoServicio = new TurnoServicio();
         medicoServicio = new MedicoServicio();
@@ -91,12 +84,10 @@ public class FormularioTurno extends JPanel{
 
         comboHorarios = new JComboBox<>();
 		
-		JLabel idLbl = new JLabel("Id ");
+
 		
 		panel.setLayout(new GridLayout(13, 2));
 		panel.add(titulo);
-		panel.add(idLbl);
-		panel.add(id);
         panel.add(fechaLbl);
         panel.add(fecha);
         panel.add(medicoLbl);
@@ -112,7 +103,7 @@ public class FormularioTurno extends JPanel{
     }
 
     private void cargarEntidades() {
-        if (!esPaciente) {
+        if (esPaciente) {
             List<Medico> medicos = medicoServicio.leerTodos();
             for (Medico m : medicos) comboEntidad.addItem(m);
         } else {
@@ -125,12 +116,17 @@ public class FormularioTurno extends JPanel{
     private void cargarHorarios() throws MedicoVacioException, SQLException{
         comboHorarios.removeAllItems();
         Medico medico = (Medico) comboEntidad.getSelectedItem();
+        List<LocalDateTime> horarios = null;
         if (medico == null) {
             throw new MedicoVacioException();
         } else {
             try{
                 LocalDate f = LocalDate.parse(fecha.getText()); // formato yyyy-MM-dd
-                List<LocalDateTime> horarios = turnoServicio.generarHorariosDisponibles(f, medico.getId());
+                if(esPaciente){
+                    horarios = turnoServicio.generarHorariosDisponibles(f, medico.getId());
+                } else {
+                    horarios = turnoServicio.generarHorariosDisponibles(f, idUsuario);
+                }
 
                 if (horarios.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "No hay horarios disponibles.");
@@ -200,15 +196,17 @@ public class FormularioTurno extends JPanel{
             try {
                 String seleccionado = (String) comboHorarios.getSelectedItem();
                 LocalDateTime horarioSeleccionado = LocalDateTime.parse(seleccionado, formatter);
-                Turno t;
-                if (!esPaciente) {
+                Turno t = null;
+                if (esPaciente) {
                     Medico m = (Medico) comboEntidad.getSelectedItem();
                     Paciente p = pacienteServicio.leer(idUsuario);
-                    t = new Turno(Integer.parseInt(id.getText()), horarioSeleccionado, m, p);
+                    t = new Turno(horarioSeleccionado, m, p);
+                    turnoServicio.grabar(t);
                 } else {
                     Paciente p = (Paciente) comboEntidad.getSelectedItem();
                     Medico m = medicoServicio.leerPorId(idUsuario);
-                    t = new Turno(Integer.parseInt(id.getText()), horarioSeleccionado, m, p);
+                    t = new Turno(horarioSeleccionado, m, p);
+                    turnoServicio.grabar(t);
                 }
 
 

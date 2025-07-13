@@ -1,6 +1,5 @@
 package Entidades;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class Turno {
     private Integer id;
@@ -11,6 +10,14 @@ public class Turno {
 
     public Turno(Integer id, LocalDateTime fechaHora, Medico medico, Paciente paciente) {
         this.id = id;
+        this.fechaHora = fechaHora;
+        this.medico = medico;
+        this.paciente = paciente;
+        this.precioConsulta = calcularPrecioConsulta();
+    }
+
+    public Turno( LocalDateTime fechaHora, Medico medico, Paciente paciente) {
+        this.id = null;
         this.fechaHora = fechaHora;
         this.medico = medico;
         this.paciente = paciente;
