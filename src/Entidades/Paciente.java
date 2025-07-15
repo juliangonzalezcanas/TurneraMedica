@@ -23,5 +23,10 @@ public class Paciente extends Usuario{
         }
         return turnosPendientes;
     }
+
+    @Override
+    public String toString() {
+        return getNombre() + " - " + getDni(); 
+    }
     
 }

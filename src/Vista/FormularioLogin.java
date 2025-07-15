@@ -1,14 +1,7 @@
 package Vista;
 
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
@@ -17,82 +10,93 @@ import Servicios.Exceptions.LoginExcepcion;
 public class FormularioLogin extends JFrame {
 
     private JTextField email;
-    private JTextField passwd;
+    private JPasswordField passwd;
+    private JLabel rolLabel;
+    private JToggleButton botonToggle;
+
     private MedicoServicio medicoServicio;
     private PacienteServicio pacienteServicio;
 
-
     public FormularioLogin() {
-
-        setLayout(new GridLayout(3, 2));
-        setVisible(true);
-        
+        setTitle("Inicio de Sesión");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Centra la ventana
 
         medicoServicio = new MedicoServicio();
         pacienteServicio = new PacienteServicio();
 
-        createPaneLogin();
-        crearBotonLog();
+        // Layout principal
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        // Título
+        JLabel titulo = new JLabel("Iniciar Sesión", SwingConstants.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 18));
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(titulo);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // Panel formulario con GridLayout para alinear los campos
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+
+        formPanel.add(new JLabel("Email:"));
+        email = new JTextField(15);
+        formPanel.add(email);
+
+        formPanel.add(new JLabel("Contraseña:"));
+        passwd = new JPasswordField(15);
+        formPanel.add(passwd);
+
+
+        JPanel rolPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        rolPanel.add(new JLabel("Rol:"));
+        rolLabel = new JLabel("Paciente");
+        botonToggle = new JToggleButton("Cambiar");
+        botonToggle.addActionListener(e -> rolLabel.setText(botonToggle.isSelected() ? "Médico" : "Paciente"));
+        rolPanel.add(rolLabel);
+        rolPanel.add(botonToggle);
+
+        formPanel.add(rolPanel);
+        mainPanel.add(formPanel);
+
         
-    }
-
-    private void createPaneLogin() {
-
-        JPanel panel = new JPanel();
-
-        JLabel labelEmail = new JLabel("Email:");
-        email = new JTextField();
-        JLabel labelPasswd = new JLabel("Contraseña:");
-        passwd = new JTextField();
-
-        panel.add(labelEmail);
-        panel.add(email);
-        panel.add(labelPasswd);
-        panel.add(passwd);
-
-        this.add(panel);
-        
-    }
-
-    private void crearBotonLog() {
-        
-        JPanel panel = new JPanel();
-		JButton boton = new JButton("Iniciar Sesión");
-        JToggleButton botonToggle = new JToggleButton("Paciente/Medico");
-
-        boton.addActionListener( e -> {
-			try {
-				if(botonToggle.isSelected()) {
-                    int idPaciente = pacienteServicio.login(email.getText(), passwd.getText());
-                    MenuPaciente menu = new MenuPaciente(idPaciente);
-                    menu.setVisible(true);
-                    this.dispose();
-                   
-                } else {
-                    int idMedico = medicoServicio.login(email.getText(), passwd.getText());
-                    MenuMedico menu = new MenuMedico(idMedico);
-                    menu.setVisible(true);
-                    this.dispose();
-                    
-                }
-			} catch (LoginExcepcion e1) {
-                JOptionPane.showMessageDialog(this, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-		});
-
+        JPanel botonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JButton botonLogin = new JButton("Iniciar Sesión");
         JButton botonRegistro = new JButton("Registrarse");
 
-        botonRegistro.addActionListener(e -> {
-            new FormularioRegistro(); // abre ventana nueva
-        });
+        botonLogin.addActionListener(e -> iniciarSesion());
+        botonRegistro.addActionListener(e -> new FormularioRegistro());
 
-        panel.add(botonRegistro);
+        botonPanel.add(botonLogin);
+        botonPanel.add(botonRegistro);
 
+        mainPanel.add(Box.createVerticalStrut(15));
+        mainPanel.add(botonPanel);
 
-        this.add(panel);
-        panel.add(boton);
-        panel.add(botonToggle);
+        add(mainPanel);
+        setVisible(true);
     }
 
-    
+
+    private void iniciarSesion() {
+        try {
+            String correo = email.getText();
+            String clave = new String(passwd.getPassword());
+
+            if (botonToggle.isSelected()) { // Médico
+                int idMedico = medicoServicio.login(correo, clave);
+                MenuMedico menu = new MenuMedico(idMedico);
+                menu.setVisible(true);
+            } else { // Paciente
+                int idPaciente = pacienteServicio.login(correo, clave);
+                MenuPaciente menu = new MenuPaciente(idPaciente);
+                menu.setVisible(true);
+            }
+            this.dispose(); // Cierra login
+        } catch (LoginExcepcion e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }

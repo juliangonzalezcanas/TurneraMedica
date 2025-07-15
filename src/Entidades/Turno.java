@@ -71,6 +71,11 @@ public class Turno {
             return this.medico.getPrecioConsulta();
         }
         
-        
     }
+
+    @Override
+    public String toString() {
+        return "Turno " + id + " - " + fechaHora.toLocalDate() + " " + fechaHora.toLocalTime();
+    }
+
 }

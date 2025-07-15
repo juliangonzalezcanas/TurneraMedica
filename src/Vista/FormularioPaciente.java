@@ -1,19 +1,9 @@
 package Vista;
 
-
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import Entidades.Paciente;
@@ -22,304 +12,178 @@ import Servicios.PacienteServicio;
 import Servicios.TurnoServicio;
 import Servicios.Exceptions.EliminandoPacienteException;
 import Servicios.Exceptions.ModificandoPacienteException;
-import Vista.Exceptions.ApellidoVacioException;
-import Vista.Exceptions.DniVacioException;
-import Vista.Exceptions.EmailVacioException;
-import Vista.Exceptions.IdVacioException;
-import Vista.Exceptions.NombreVacioException;
-import Vista.Exceptions.ObraSocialVaciaException;
+import Vista.Exceptions.*;
 
 public class FormularioPaciente extends JPanel {
 
-	private JTextField nombre, apellido, dni, email, obra_social, passwd;
+    private JTextField nombre, apellido, dni, email, obra_social, passwd;
+    private JTable tablaPacientes;
+    private JTextField fechaTurno;
 
-	private JTable tablaPacientes;
-	
-	private PacienteServicio pacienteServicio;
-	private TurnoServicio turnoServicio;
+    private PacienteServicio pacienteServicio;
+    private TurnoServicio turnoServicio;
 
-	private int idPaciente;
-	
+    private int idPaciente;
 
+    public FormularioPaciente(int idPaciente) {
+        this.idPaciente = idPaciente;
+        this.setLayout(new BorderLayout());
 
-	public FormularioPaciente(int idPaciente) {
+        pacienteServicio = new PacienteServicio();
+        turnoServicio = new TurnoServicio();
 
-		
-		setLayout(new GridLayout(6,2));
-        add(new JLabel("Gestión de Pacientes", SwingConstants.CENTER));
-		crearBotonSwitch();
-		
-		this.idPaciente = idPaciente;
-		
+        JPanel formPanel = new JPanel(new GridLayout(8, 2, 5, 5));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Datos del Paciente"));
 
-		nombre = new JTextField();
-		apellido = new JTextField();
-		dni = new JTextField();
-		email = new JTextField();
-		obra_social = new JTextField();
-		passwd = new JTextField();
+        nombre = new JTextField(); apellido = new JTextField();
+        dni = new JTextField(); email = new JTextField();
+        obra_social = new JTextField(); passwd = new JTextField();
 
-		tablaPacientes = new JTable();
+        formPanel.add(new JLabel("Nombre:")); formPanel.add(nombre);
+        formPanel.add(new JLabel("Apellido:")); formPanel.add(apellido);
+        formPanel.add(new JLabel("DNI:")); formPanel.add(dni);
+        formPanel.add(new JLabel("Email:")); formPanel.add(email);
+        formPanel.add(new JLabel("Obra Social:")); formPanel.add(obra_social);
+        formPanel.add(new JLabel("Contraseña:")); formPanel.add(passwd);
 
-		pacienteServicio = new PacienteServicio();
-		turnoServicio = new TurnoServicio();
-		
-		
-		
+        JButton btnLlenarCampos = new JButton("Llenar campos");
+        btnLlenarCampos.addActionListener(e -> llenarCampos());
+        formPanel.add(btnLlenarCampos);
 
-		createPaneAgregar();
+        JButton btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(e -> modificarPaciente());
+        formPanel.add(btnModificar);
 
-		crearBotonLlenarCampos();
-		crearBotonModificar();
+        this.add(formPanel, BorderLayout.NORTH);
 
+        // Botones secundarios
+        JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-		createPanelEliminar();
-		crearBotonEliminar();
+        JButton btnEliminar = new JButton("Eliminar Paciente");
+        btnEliminar.addActionListener(e -> eliminarPaciente());
+        accionesPanel.add(btnEliminar);
 
-		paneBuscarTurnos();
-		add(new JLabel(" ", SwingConstants.CENTER));
+        JToggleButton btnPersistencia = new JToggleButton("BDD/Archivo");
+        btnPersistencia.addActionListener(e -> togglePersistencia(btnPersistencia.isSelected()));
+        accionesPanel.add(btnPersistencia);
 
-		crearTabla();
-		
-		
-	}
-	
-	private void createPaneAgregar() {
-		JPanel panel = new JPanel();
-		
-		JLabel titulo = new JLabel("Paciente");
-		JLabel nombreLbl = new JLabel("Nombre ");
-		JLabel apellidoLbl = new JLabel("Apellido ");
-		JLabel dniLbl = new JLabel("Dni ");
-		JLabel emailLbl = new JLabel("Email ");
-		JLabel obra_socialLbl = new JLabel("Obra social ");
-		JLabel passwdLbl = new JLabel("Contraseña ");
-		
-		
-		panel.setLayout(new FlowLayout());
-		panel.add(titulo);
-		panel.add(nombreLbl);
-		panel.add(nombre);
-		panel.add(apellidoLbl);
-		panel.add(apellido);
-		panel.add(dniLbl);
-		panel.add(dni);
-		panel.add(emailLbl);
-		panel.add(email);
-		panel.add(obra_socialLbl);
-		panel.add(obra_social);
-		panel.add(passwdLbl);
-		panel.add(passwd);
-		
+        this.add(accionesPanel, BorderLayout.CENTER);
 
+        // Buscar turnos
+        JPanel turnoPanel = new JPanel();
+        turnoPanel.setBorder(BorderFactory.createTitledBorder("Turnos"));
+        fechaTurno = new JTextField(10);
+        JButton btnBuscarTurnos = new JButton("Buscar Turnos");
+        btnBuscarTurnos.addActionListener(e -> buscarTurnos());
+        turnoPanel.add(new JLabel("Fecha (yyyy-MM-dd):"));
+        turnoPanel.add(fechaTurno);
+        turnoPanel.add(btnBuscarTurnos);
 
+        this.add(turnoPanel, BorderLayout.SOUTH);
 
-		this.add(panel);
-	}
+        // Tabla de pacientes
+        tablaPacientes = new JTable();
+        JScrollPane scroll = new JScrollPane(tablaPacientes);
+        scroll.setBorder(BorderFactory.createTitledBorder("Todos los Pacientes"));
+        this.add(scroll, BorderLayout.EAST);
 
-	private void crearBotonLlenarCampos() {
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Llenar campos");
+        actualizarTabla();
+    }
 
-		boton.addActionListener(e ->{
-			try {
-        		Paciente paciente = pacienteServicio.leer(idPaciente); 
-				if(paciente != null){
-					nombre.setText(paciente.getNombre());
-					apellido.setText(paciente.getApellido());
-					dni.setText(paciente.getDni().toString());
-					email.setText(paciente.getEmail());
-					obra_social.setText(paciente.getObraSocial());
+    private void llenarCampos() {
+        try {
+            Paciente paciente = pacienteServicio.leer(idPaciente);
+            if (paciente != null) {
+                nombre.setText(paciente.getNombre());
+                apellido.setText(paciente.getApellido());
+                dni.setText(paciente.getDni().toString());
+                email.setText(paciente.getEmail());
+                obra_social.setText(paciente.getObraSocial());
+            } else {
+                mostrarError("Paciente no encontrado");
+            }
+        } catch (IOException | ClassNotFoundException ex) {
+            mostrarError("Error al buscar paciente: " + ex.getMessage());
+        }
+    }
 
-					panel.revalidate();
-					panel.repaint();
-				} else {
-					JOptionPane.showMessageDialog(this, "Paciente no encontrado", 
-						"Error", JOptionPane.ERROR_MESSAGE);
-				}
+    private void modificarPaciente() {
+        try {
+            validarCampos();
+            Paciente p = new Paciente(idPaciente, nombre.getText(), apellido.getText(),
+                    Integer.parseInt(dni.getText()), email.getText(), obra_social.getText(), passwd.getText());
+            pacienteServicio.modificar(p);
+            mostrarInfo("Paciente modificado correctamente");
+            actualizarTabla();
+        } catch (Exception e) {
+            mostrarError("Error al modificar el paciente: " + e.getMessage());
+        }
+    }
 
-			} catch (IOException | ClassNotFoundException ex) {
-				JOptionPane.showMessageDialog(this, "Error al buscar paciente: " + ex.getMessage(), 
-					"Error", JOptionPane.ERROR_MESSAGE);
-			} catch (NumberFormatException ex) {
-				JOptionPane.showMessageDialog(this, "Id inválido", 
-					"Error", JOptionPane.ERROR_MESSAGE);
-			}
-		});
-		panel.add(boton);
-		this.add(panel);
-	}
+    private void eliminarPaciente() {
+        try {
+            pacienteServicio.eliminar(idPaciente);
+            mostrarInfo("Paciente eliminado correctamente");
+            actualizarTabla();
+        } catch (EliminandoPacienteException e) {
+            mostrarError("Error al eliminar paciente");
+        }
+    }
 
-	private void createPanelEliminar(){
+    private void buscarTurnos() {
+        try {
+            List<Turno> turnos = turnoServicio.buscarPorPaciente(idPaciente);
+            StringBuilder sb = new StringBuilder("\nTurnos:\n");
+            for (Turno t : turnos) {
+                sb.append("ID: ").append(t.getId())
+                        .append(", Fecha: ").append(t.getFecha())
+                        .append(", Médico: ").append(t.getMedico().getNombre())
+                        .append("\n");
+            }
+            mostrarInfo(sb.toString());
+        } catch (Exception ex) {
+            mostrarError("Error al buscar turnos: " + ex.getMessage());
+        }
+    }
 
-		JPanel panel = new JPanel();
+    private void actualizarTabla() {
+        List<Paciente> lista = pacienteServicio.leerTodos();
+        String[] columnas = {"ID", "Nombre", "Apellido", "DNI", "Email", "Obra Social"};
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+        for (Paciente p : lista) {
+            modelo.addRow(new Object[]{
+                    p.getId(), p.getNombre(), p.getApellido(),
+                    p.getDni(), p.getEmail(), p.getObraSocial()
+            });
+        }
+        tablaPacientes.setModel(modelo);
+    }
 
-		JLabel titulo = new JLabel("Eliminar Paciente");
-		
-		
-		panel.setLayout(new GridLayout(3, 2));
-		panel.add(titulo);
-	
-		this.add(panel);
-	}
+    private void togglePersistencia(boolean bdd) {
+        if (bdd) {
+            pacienteServicio.setPersistencia(new Persistencia.DB.PacienteDBDao());
+            mostrarInfo("Persistencia cambiada a Base de Datos");
+        } else {
+            pacienteServicio.setPersistencia(new Persistencia.Archivo.ArchivoPacienteDao());
+            mostrarInfo("Persistencia cambiada a Archivo");
+        }
+    }
 
-	private void crearTabla(){
-		JPanel panel = new JPanel();
-		List<Paciente> listaPacientes = pacienteServicio.leerTodos();
+    private void validarCampos() throws NombreVacioException, ApellidoVacioException,
+            DniVacioException, EmailVacioException, ObraSocialVaciaException, IdVacioException {
 
-		String[] columnas = {"ID", "Nombre", "Apellido", "DNI", "Email", "Obra Social"};
-		DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
-		modelo.addRow(columnas);
-		for (Paciente p : listaPacientes) {
-			Object[] fila = {
-				p.getId(),
-				p.getNombre(),
-				p.getApellido(),
-				p.getDni(),
-				p.getEmail(),
-				p.getObraSocial()
-			};
-			modelo.addRow(fila);
-		}
-		tablaPacientes.setModel(modelo);
-		panel.add(tablaPacientes);
-		this.add(panel);
+        if (nombre.getText().isEmpty()) throw new NombreVacioException();
+        if (apellido.getText().isEmpty()) throw new ApellidoVacioException();
+        if (dni.getText().isEmpty()) throw new DniVacioException();
+        if (email.getText().isEmpty()) throw new EmailVacioException();
+        if (obra_social.getText().isEmpty()) throw new ObraSocialVaciaException();
+    }
 
-	}
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-	private void crearBotonEliminar(){
-
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Eliminar");
-		
-		boton.addActionListener( e -> {
-			try {
-				pacienteServicio.eliminar(idPaciente);
-				JOptionPane.showMessageDialog(this, "Paciente eliminado correctamente", 
-					"Éxito", JOptionPane.INFORMATION_MESSAGE);
-			} catch (EliminandoPacienteException e1) {
-				JOptionPane.showMessageDialog(this, "Error al eliminar el paciente", 
-					"Error", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
-			} 
-		});
-
-		panel.add(boton);
-		this.add(panel);
-	}
-
-	private void crearBotonModificar(){
-
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Modificar");
-		
-		boton.addActionListener( e -> {
-			try {
-				validarCampos();
-				Paciente p = new Paciente(idPaciente, nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), "");
-				pacienteServicio.modificar(p);
-
-				JOptionPane.showMessageDialog(this, "Paciente modificado correctamente", 
-					"Éxito", JOptionPane.INFORMATION_MESSAGE);
-				
-
-			} catch (NombreVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (ApellidoVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El apellido no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (DniVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El dni no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (EmailVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El email no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (ObraSocialVaciaException e1) {
-				JOptionPane.showMessageDialog(this, "La obra social no puede estar vacía", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (IdVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El id no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-			} catch (ModificandoPacienteException e1) {
-				JOptionPane.showMessageDialog(this, "Error al modificar el paciente", 
-					"Error", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
-			} 
-		});
-
-		panel.add(boton);
-		this.add(panel);
-	}
-	
-
-	private void crearBotonSwitch(){
-
-		JPanel panel = new JPanel();
-		JToggleButton boton = new JToggleButton("BDD/Archivo");
-			
-		boton.addActionListener( e -> {
-			
-			if(boton.isSelected()) {
-				pacienteServicio.setPersistencia(new Persistencia.DB.PacienteDBDao());
-				JOptionPane.showMessageDialog(this, "Persistencia cambiada a Base de Datos", 
-					"Cambio de persistencia", JOptionPane.INFORMATION_MESSAGE);
-			} else {
-				pacienteServicio.setPersistencia(new Persistencia.Archivo.ArchivoPacienteDao());
-				JOptionPane.showMessageDialog(this, "Persistencia cambiada a Archivo", 
-					"Cambio de persistencia", JOptionPane.INFORMATION_MESSAGE);
-			}
-			
-		});
-
-		panel.add(boton);
-		this.add(panel);
-
-	}
-
-	private void paneBuscarTurnos(){
-		JPanel panel = new JPanel();
-		JToggleButton boton = new JToggleButton("Buscar Turnos");
-
-
-		boton.addActionListener(e -> {
-			try {
-				List<Turno> turnosPaciente = turnoServicio.buscarPorPaciente(idPaciente);
-				List<Turno> turnosPorFecha = pacienteServicio.buscarTurnosPorFecha(turnosPaciente, java.time.LocalDate.now());
-				for(Turno t: turnosPorFecha){
-					panel.add(new JLabel("Turno: " + t.getId() + ", Medico: " + t.getMedico() + " - Fecha: " + t.getFecha().toLocalDate() + " - Hora: " + t.getFecha().toLocalTime()));
-				}
-				panel.revalidate();
-				panel.repaint();
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Error al buscar turnos: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			}
-		});
-		panel.add(boton);
-		this.add(panel);
-	}
-
-
-	
-	private Boolean validarCampos() throws NombreVacioException, ApellidoVacioException, DniVacioException, EmailVacioException, ObraSocialVaciaException, IdVacioException {
-
-		if (nombre.getText().isEmpty())
-			throw new NombreVacioException();
-		if (apellido.getText().isEmpty())
-			throw new ApellidoVacioException();
-		if (dni.getText().isEmpty())
-			throw new DniVacioException();
-		if (email.getText().isEmpty())
-			throw new EmailVacioException();
-		if (obra_social.getText().isEmpty())
-			throw new ObraSocialVaciaException();
-		return true;
-	}
-
-
+    private void mostrarInfo(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
+    }
 }
-
-
-

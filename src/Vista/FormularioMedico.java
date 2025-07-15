@@ -1,348 +1,202 @@
+// Versión mejorada de tu formulario de médicos con mejor estética y organización visual
+
 package Vista;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableModel;
-
 import Entidades.Medico;
 import Entidades.Turno;
 import Servicios.MedicoServicio;
 import Servicios.TurnoServicio;
-import Vista.Exceptions.ApellidoVacioException;
-import Vista.Exceptions.DniVacioException;
-import Vista.Exceptions.EmailVacioException;
-import Vista.Exceptions.EspecialidadVaciaException;
-import Vista.Exceptions.IdVacioException;
-import Vista.Exceptions.NombreVacioException;
-import Vista.Exceptions.ObraSocialVaciaException;
-import Vista.Exceptions.PrecioConsultaVacioException;
+import Vista.Exceptions.*;
 
 public class FormularioMedico extends JPanel {
-    private JTextField nombre, apellido, dni, email, obra_social, precio_consulta, especialidad, passwd;
+    private JTextField nombre, apellido, dni, email, obraSocial, precioConsulta, especialidad, passwd;
+    private JTextField fechaInicio, fechaFin, fechaBusqueda;
+    private JTable tablaMedicos;
+    private int idMedico;
 
-	private JTable tablaMedicos;
+    private MedicoServicio medicoServicio = new MedicoServicio();
+    private TurnoServicio turnoServicio = new TurnoServicio();
 
-	private JTextField fecha1;
-	private JTextField fecha2;
-	private JTextField fechaB;
-	
-	private MedicoServicio medicoServicio;
-	private TurnoServicio turnoServicio;
+    public FormularioMedico(int idMedico) {
+        this.idMedico = idMedico;
 
-	private int idMedico;
+        setLayout(new BorderLayout(10, 10));
 
+        add(crearPanelFormulario(), BorderLayout.NORTH);
+        add(crearPanelBotones(), BorderLayout.CENTER);
+        add(crearPanelTabla(), BorderLayout.SOUTH);
+    }
 
+    private JPanel crearPanelFormulario() {
+        JPanel panel = new JPanel(new GridLayout(5, 4, 10, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Datos del Médico"));
 
-	public FormularioMedico(int idMedico) {
+        nombre = new JTextField(); apellido = new JTextField(); dni = new JTextField();
+        email = new JTextField(); obraSocial = new JTextField(); precioConsulta = new JTextField();
+        especialidad = new JTextField(); passwd = new JTextField();
 
-		
-		setLayout(new GridLayout(8,2));
-        add(new JLabel("Gestión de Medicos", SwingConstants.CENTER), BorderLayout.NORTH);
-		add(new JLabel(" ", SwingConstants.CENTER), BorderLayout.NORTH);
+        panel.add(new JLabel("Nombre:")); panel.add(nombre);
+        panel.add(new JLabel("Apellido:")); panel.add(apellido);
+        panel.add(new JLabel("DNI:")); panel.add(dni);
+        panel.add(new JLabel("Email:")); panel.add(email);
+        panel.add(new JLabel("Obra Social:")); panel.add(obraSocial);
+        panel.add(new JLabel("Precio Consulta:")); panel.add(precioConsulta);
+        panel.add(new JLabel("Especialidad:")); panel.add(especialidad);
+        panel.add(new JLabel("Contraseña:")); panel.add(passwd);
 
-		medicoServicio = new MedicoServicio();
-		turnoServicio = new TurnoServicio();
-		
-        nombre = new JTextField();
-		apellido = new JTextField();
-		dni = new JTextField();
-		email = new JTextField();
-        precio_consulta = new JTextField();
-		obra_social = new JTextField();
-		especialidad = new JTextField();
-		passwd = new JTextField();
+        return panel;
+    }
 
-		tablaMedicos = new JTable();
-		
-		fecha1 = new JTextField();
-		fecha2 = new JTextField();
+    private JPanel crearPanelBotones() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		fechaB = new JTextField();
+        JPanel filaBotones = new JPanel(new FlowLayout());
+        JButton btnLlenar = new JButton("Llenar campos");
+        JButton btnModificar = new JButton("Modificar");
+        JButton btnEliminar = new JButton("Eliminar");
 
-		this.idMedico = idMedico;
+        filaBotones.add(btnLlenar);
+        filaBotones.add(btnModificar);
+        filaBotones.add(btnEliminar);
 
-		createPanelAgregar();
-		
-		crearBotonLlenarCampos();
-		crearBotonModificar();
+        btnLlenar.addActionListener(e -> llenarCampos());
+        btnModificar.addActionListener(e -> modificarMedico());
+        btnEliminar.addActionListener(e -> eliminarMedico());
 
-		createPaneEliminar();
-		crearBotonEliminar();
+        panel.add(filaBotones);
 
-		createPaneGanancia();
-		createPaneBuscarTurno();
+        // Panel Ganancia
+        JPanel gananciaPanel = new JPanel(new FlowLayout());
+        fechaInicio = new JTextField(8);
+        fechaFin = new JTextField(8);
+        JButton btnGanancia = new JButton("Calcular Ganancia");
+        gananciaPanel.add(new JLabel("Desde:")); gananciaPanel.add(fechaInicio);
+        gananciaPanel.add(new JLabel("Hasta:")); gananciaPanel.add(fechaFin);
+        gananciaPanel.add(btnGanancia);
+        btnGanancia.addActionListener(e -> calcularGanancia());
+        panel.add(gananciaPanel);
 
-		crearTabla();
-		
-	}
-	
-	private void createPanelAgregar() {
-		JPanel panel = new JPanel();
-		
-		JLabel titulo = new JLabel("Agregar Medico");
-		JLabel nombreLbl = new JLabel("Nombre ");
-		JLabel apellidoLbl = new JLabel("Apellido ");
-		JLabel dniLbl = new JLabel("Dni ");
-		JLabel emailLbl = new JLabel("Email ");
-		JLabel obra_socialLbl = new JLabel("Obra social ");
-        JLabel precio_consultaLbl = new JLabel("Precio consulta ");
-		JLabel especialidadLbl = new JLabel("Especialidad ");
-		JLabel passwdLbl = new JLabel("Contraseña ");
-		
-		panel.setLayout(new FlowLayout());
-		panel.add(titulo);
-		panel.add(nombreLbl);
-		panel.add(nombre);
-		panel.add(apellidoLbl);
-		panel.add(apellido);
-		panel.add(dniLbl);
-		panel.add(dni);
-		panel.add(emailLbl);
-		panel.add(email);
-        panel.add(precio_consultaLbl);
-        panel.add(precio_consulta);
-		panel.add(obra_socialLbl);
-		panel.add(obra_social);
-		panel.add(especialidadLbl);
-		panel.add(especialidad);
-		panel.add(passwdLbl);
-		panel.add(passwd);
+        // Panel Turno
+        JPanel turnoPanel = new JPanel(new FlowLayout());
+        fechaBusqueda = new JTextField(8);
+        JButton btnBuscarTurno = new JButton("Buscar Turnos");
+        turnoPanel.add(new JLabel("Fecha:")); turnoPanel.add(fechaBusqueda);
+        turnoPanel.add(btnBuscarTurno);
+        btnBuscarTurno.addActionListener(e -> buscarTurnosPorFecha());
+        panel.add(turnoPanel);
 
-		this.add(panel);
-	}
+        return panel;
+    }
 
+    private JScrollPane crearPanelTabla() {
+        tablaMedicos = new JTable();
+        cargarTabla();
+        return new JScrollPane(tablaMedicos);
+    }
 
+    private void cargarTabla() {
+        List<Medico> medicos = medicoServicio.leerTodos();
+        String[] columnas = {"ID", "Nombre", "Apellido", "DNI", "Email", "Obra Social", "Precio", "Especialidad"};
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
 
-	private void createPaneEliminar(){
-		JPanel panel = new JPanel();
+        for (Medico m : medicos) {
+            modelo.addRow(new Object[]{m.getId(), m.getNombre(), m.getApellido(), m.getDni(), m.getEmail(), m.getObraSocial(), m.getPrecioConsulta(), m.getEspecialidad()});
+        }
+        tablaMedicos.setModel(modelo);
+    }
 
-		JLabel titulo = new JLabel("Eliminar Medico");
-		
-		panel.setLayout(new FlowLayout());
-		panel.add(titulo);
+    private void llenarCampos() {
+        try {
+            Medico m = medicoServicio.leerPorId(idMedico);
+            if (m != null) {
+                nombre.setText(m.getNombre()); 
+				apellido.setText(m.getApellido());
+				dni.setText(m.getDni().toString());
+                email.setText(m.getEmail()); 
+				obraSocial.setText(m.getObraSocial()); 
+				precioConsulta.setText(m.getPrecioConsulta().toString());
+                especialidad.setText(m.getEspecialidad());
+            }
+        } catch (Exception e) {
+            mostrarError("Error al cargar datos: " + e.getMessage());
+        }
+    }
 
-		this.add(panel);
-	}
+    private void modificarMedico() {
+        try {
+            validarCampos();
+            Medico m = new Medico(idMedico, nombre.getText(), apellido.getText(), Integer.parseInt(dni.getText()),
+                    email.getText(), obraSocial.getText(), Float.parseFloat(precioConsulta.getText()),
+                    especialidad.getText(), passwd.getText());
+            medicoServicio.modificar(m);
+            mostrarInfo("Médico modificado con éxito.");
+            cargarTabla();
+        } catch (Exception e) {
+            mostrarError("Error al modificar: " + e.getMessage());
+        }
+    }
 
-	private void createPaneGanancia(){
-		JPanel panel = new JPanel();
+    private void eliminarMedico() {
+        try {
+            medicoServicio.eliminar(idMedico);
+            mostrarInfo("Médico eliminado.");
+            cargarTabla();
+        } catch (Exception e) {
+            mostrarError("Error al eliminar: " + e.getMessage());
+        }
+    }
 
-		JLabel fecha1Lbl = new JLabel("Fecha desde ");
-		JLabel fecha2Lbl = new JLabel("hasta ");
-		JButton boton = new JButton("Calcular Ganancia");
+    private void calcularGanancia() {
+        try {
+            List<Turno> turnos = turnoServicio.buscarPorMedico(idMedico);
+            Float ganancia = medicoServicio.calcularGanancia(
+                    LocalDateTime.of(LocalDate.parse(fechaInicio.getText()), LocalTime.MIN),
+                    LocalDateTime.of(LocalDate.parse(fechaFin.getText()), LocalTime.MIN),
+                    turnos);
+            mostrarInfo("Ganancia: $" + ganancia);
+        } catch (Exception e) {
+            mostrarError("Error en cálculo: " + e.getMessage());
+        }
+    }
 
+    private void buscarTurnosPorFecha() {
+        try {
+            List<Turno> turnos = medicoServicio.buscarTurnosPorFecha(
+                    turnoServicio.buscarPorMedico(idMedico),
+                    LocalDate.parse(fechaBusqueda.getText()));
+            for (Turno t : turnos) {
+                mostrarInfo("Turno: " + t.getId() + " - Paciente: " + t.getPaciente().getNombre());
+            }
+        } catch (Exception e) {
+            mostrarError("Error buscando turnos: " + e.getMessage());
+        }
+    }
 
-		panel.add(fecha1Lbl);
-		panel.add(fecha1);
-		panel.add(fecha2Lbl);
-		panel.add(fecha2);
+    private void mostrarInfo(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
+    }
 
-		boton.addActionListener( e -> {
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-			List<Turno> turnosMedico = turnoServicio.buscarPorMedico(idMedico);
-			Float ganancia = medicoServicio.calcularGanancia(LocalDateTime.of(LocalDate.parse(fecha1.getText()), LocalTime.of(0, 0)), LocalDateTime.of(LocalDate.parse(fecha2.getText()), LocalTime.of(0, 0)), turnosMedico);
-			panel.add(new JLabel("El medico/a: " + turnosMedico.getFirst().getMedico().getNombre() + " gano: " + ganancia + "$" + " en el periodo seleccionado"));
-			panel.revalidate();
-			panel.repaint();
-		});
-
-		panel.add(boton);
-
-		this.add(panel);
-	}
-
-	private void createPaneBuscarTurno(){
-		JPanel panel = new JPanel();
-
-		JLabel fechaLbl = new JLabel("Fecha: ");
-		JButton boton = new JButton("Buscar Turnos");
-
-		panel.add(fechaLbl);
-		panel.add(fechaB);
-
-		boton.addActionListener( e -> {
-			List<Turno> turnosMedico = turnoServicio.buscarPorMedico(idMedico);
-			List<Turno> turnosLimpia = medicoServicio.buscarTurnosPorFecha(turnosMedico, LocalDate.parse(fechaB.getText()));
-			for(Turno t: turnosLimpia) {
-				panel.add(new JLabel("Turno: " + t.getId() + " para el paciente: " + t.getPaciente().getNombre() + " en la fecha seleccionada"));
-			}
-			panel.revalidate();
-			panel.repaint();
-		});
-		
-		
-		panel.add(boton);
-
-		this.add(panel);
-
-	}
-
-	private void crearBotonEliminar(){
-
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Eliminar");
-		
-		boton.addActionListener( e -> {
-			try {
-				medicoServicio.eliminar(idMedico);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
-
-		panel.add(boton);
-		this.add(panel);
-	}
-
-	private void crearBotonModificar(){
-
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Modificar");
-		
-		boton.addActionListener( e -> {
-			try {
-				validarCampos();
-				Medico m = new Medico(idMedico, nombre.getText(), apellido.getText(), 
-					Integer.valueOf(dni.getText()), email.getText(), obra_social.getText(), Float.valueOf(precio_consulta.getText()), especialidad.getText(), passwd.getText());
-				medicoServicio.modificar(m);
-				JOptionPane.showMessageDialog(this, "Medico modificado", 
-					"Campo vacio", JOptionPane.YES_OPTION);
-			}  catch (EspecialidadVaciaException e1) {
-				e1.printStackTrace();
-			} catch (PrecioConsultaVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El precio de la consulta no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (NombreVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (ApellidoVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El apellido no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (DniVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El dni no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (EmailVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El email no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (ObraSocialVaciaException e1) {
-				JOptionPane.showMessageDialog(this, "La obra social no puede estar vacía", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			} catch (IdVacioException e1) {
-				JOptionPane.showMessageDialog(this, "El id no puede estar vacío", 
-					"Campo vacio", JOptionPane.INFORMATION_MESSAGE);
-				e1.printStackTrace();
-			}
-		});
-
-		panel.add(boton);
-		this.add(panel);
-	}
-
-	private void crearBotonLlenarCampos() {
-		JPanel panel = new JPanel();
-		JButton boton = new JButton("Llenar campos");
-
-		boton.addActionListener(e ->{
-			try {
-        		Medico m = medicoServicio.leerPorId(idMedico); 
-				if(m != null){
-					nombre.setText(m.getNombre());
-					apellido.setText(m.getApellido());
-					dni.setText(m.getDni().toString());
-					email.setText(m.getEmail());
-					obra_social.setText(m.getObraSocial());
-					precio_consulta.setText(m.getPrecioConsulta().toString());
-					especialidad.setText(m.getEspecialidad());
-
-					panel.revalidate();
-					panel.repaint();
-				} else {
-					JOptionPane.showMessageDialog(this, "Paciente no encontrado", 
-						"Error", JOptionPane.ERROR_MESSAGE);
-				}
-
-			} catch (IOException | ClassNotFoundException ex) {
-				JOptionPane.showMessageDialog(this, "Error al buscar paciente: " + ex.getMessage(), 
-					"Error", JOptionPane.ERROR_MESSAGE);
-			} catch (NumberFormatException ex) {
-				JOptionPane.showMessageDialog(this, "Id inválido", 
-					"Error", JOptionPane.ERROR_MESSAGE);
-			}
-		});
-		panel.add(boton);
-		this.add(panel);
-	}
-
-	private void crearTabla(){
-		JPanel panel = new JPanel();
-		List<Medico> listaMedicos = medicoServicio.leerTodos();
-
-		String[] columnas = {"ID", "Nombre", "Apellido", "DNI", "Email", "Obra Social", "Precio Consulta", "Especialidad"};
-		DefaultTableModel modelo = new DefaultTableModel(columnas, listaMedicos.size());
-		modelo.addRow(columnas);
-		for (Medico m : listaMedicos) {
-			Object[] fila = {
-				m.getId(),
-				m.getNombre(),
-				m.getApellido(),
-				m.getDni(),
-				m.getEmail(),
-				m.getObraSocial(),
-				m.getPrecioConsulta(),
-				m.getEspecialidad(),
-				m.getPassword() // Agregado para mostrar la contraseña
-			};
-			modelo.addRow(fila);
-		}
-		tablaMedicos.setModel(modelo);
-		panel.add(tablaMedicos);
-		this.add(panel);
-
-	}
-
-
-	
-	private Boolean validarCampos() throws NombreVacioException, ApellidoVacioException, DniVacioException, EmailVacioException, ObraSocialVaciaException, PrecioConsultaVacioException, IdVacioException, EspecialidadVaciaException {
-
-		if (nombre.getText().isEmpty())
-			throw new NombreVacioException();
-		if (apellido.getText().isEmpty())
-			throw new ApellidoVacioException();
-		if (dni.getText().isEmpty())
-			throw new DniVacioException();
-		if (email.getText().isEmpty())
-			throw new EmailVacioException();
-		if (obra_social.getText().isEmpty())
-			throw new ObraSocialVaciaException();
-		if (precio_consulta.getText().isEmpty())
-			throw new PrecioConsultaVacioException();
-		if (especialidad.getText().isEmpty())
-			throw new EspecialidadVaciaException();
-		return true;
-	}
-
+    private void validarCampos() throws Exception {
+        if (nombre.getText().isEmpty()) throw new NombreVacioException();
+        if (apellido.getText().isEmpty()) throw new ApellidoVacioException();
+        if (dni.getText().isEmpty()) throw new DniVacioException();
+        if (email.getText().isEmpty()) throw new EmailVacioException();
+        if (obraSocial.getText().isEmpty()) throw new ObraSocialVaciaException();
+        if (precioConsulta.getText().isEmpty()) throw new PrecioConsultaVacioException();
+        if (especialidad.getText().isEmpty()) throw new EspecialidadVaciaException();
+    }
 }
