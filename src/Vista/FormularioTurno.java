@@ -131,9 +131,8 @@ public class FormularioTurno extends JPanel {
         Medico medico = null;
         try {
             medico = esPaciente ? (Medico) comboEntidad.getSelectedItem() : medicoServicio.leerPorId(idUsuario);
-        } catch (ClassNotFoundException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Error e){
+            //revisar
         }
 
         if (medico == null) throw new MedicoVacioException();

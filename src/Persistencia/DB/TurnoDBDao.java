@@ -65,7 +65,7 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 
 
 	@Override
-	public Turno leer(Integer id) throws IOException, ClassNotFoundException {
+	public Turno leer(Integer id) throws SQLException {
 
 		String sql = "select * from TURNO where id = ?";
 
@@ -76,19 +76,19 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SQLException("Error al leer el turno con ID: " + id, e);
 		}
 		return null;
 	}
 
 	@Override
-	public void eliminar(Integer id) throws IOException, ClassNotFoundException {
+	public void eliminar(Integer id) throws SQLException{
 		String sql = "delete from TURNO where id = ?";
 		try {
 			updateDeleteInsertSql(sql, id);
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			throw new IOException();
+			throw new SQLException("Error al eliminar el turno con ID: " + id, e);
 		}
 		
 	}

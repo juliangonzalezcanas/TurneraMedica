@@ -1,6 +1,7 @@
 package Servicios;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class PacienteServicio {
             String hashedPasswd = BCrypt.hashpw(p.getPassword(), BCrypt.gensalt());
             p.setPassword(hashedPasswd);
             persistencia.grabar(p);
-        } catch (IOException e) {
+        } catch (SQLException e) {
             throw new GrabandoPacienteException(); 
         }
     }
@@ -59,7 +60,13 @@ public class PacienteServicio {
     }
 
     public List<Paciente> leerTodos(){
-        return persistencia.leerTodos();
+        try {
+            return persistencia.leerTodos();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void eliminar(Integer id) throws EliminandoPacienteException {
@@ -73,7 +80,13 @@ public class PacienteServicio {
     }
 
     public Paciente leer(Integer id) throws IOException, ClassNotFoundException {
-        return persistencia.leer(id);
+        try {
+            return persistencia.leer(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<Turno> buscarTurnosPorFecha(List<Turno> turnos, LocalDate f) {

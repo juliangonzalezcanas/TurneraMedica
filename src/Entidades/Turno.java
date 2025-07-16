@@ -7,6 +7,8 @@ public class Turno {
     private Medico medico;
     private Paciente paciente;
     private Float precioConsulta;
+    private Consultorio consultorio;
+
 
     public Turno(Integer id, LocalDateTime fechaHora, Medico medico, Paciente paciente) {
         this.id = id;
@@ -62,6 +64,14 @@ public class Turno {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Consultorio getConsultorio() {
+        return consultorio;
+    }
+
+    public void setConsultorio(Consultorio consultorio) {
+        this.consultorio = consultorio;
     }
 
     public Float calcularPrecioConsulta(){

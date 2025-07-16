@@ -1,16 +1,15 @@
 package Servicios;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import Entidades.Paciente;
 import Entidades.Turno;
 import Persistencia.ICrud;
-import Persistencia.DB.PacienteDBDao;
 import Persistencia.DB.TurnoDBDao;
 import Servicios.Exceptions.GrabandoPacienteException;
 
@@ -25,42 +24,69 @@ public class TurnoServicio {
         this.persistencia = persistencia;
     }
 
-    public void grabar(Turno t) throws IOException, GrabandoPacienteException {
+    public void grabar(Turno t) {
         try{
             persistencia.grabar(t);
-        } catch (IOException e) {
-            throw new GrabandoPacienteException(); 
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
     public void modificar(Turno t) {
-        persistencia.modificar(t);
+        try {
+            persistencia.modificar(t);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public List<Turno> leerTodos(){
-        return persistencia.leerTodos();
+        try {
+            return persistencia.leerTodos();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void eliminar(Integer id) throws IOException, ClassNotFoundException {
-        persistencia.eliminar(id);
+        try {
+            persistencia.eliminar(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public List<Turno> buscarPorMedico(int medicoId) {
         List<Turno> turnos = new ArrayList<>();
-        for (Turno turno : persistencia.leerTodos()) {
-            if (turno.getMedico().getId() == medicoId) {
-                turnos.add(turno);
+        try {
+            for (Turno turno : persistencia.leerTodos()) {
+                if (turno.getMedico().getId() == medicoId) {
+                    turnos.add(turno);
+                }
             }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return turnos;
     }
 
     public List<Turno> buscarPorPaciente(int pacienteId) {
         List<Turno> turnos = new ArrayList<>();
-        for (Turno turno : persistencia.leerTodos()) {
-            if (turno.getPaciente().getId() == pacienteId) {
-                turnos.add(turno);
+        try {
+            for (Turno turno : persistencia.leerTodos()) {
+                if (turno.getPaciente().getId() == pacienteId) {
+                    turnos.add(turno);
+                }
             }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return turnos;
     }

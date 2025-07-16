@@ -76,13 +76,13 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			
 		}
 		return  new Object[] {id, password};
 	}
 
 	@Override
-	public Medico leer(Integer id) throws IOException, ClassNotFoundException {
+	public Medico leer(Integer id) throws SQLException {
 
 		String sql = "select * from MEDICO where id = ?";
 
@@ -93,20 +93,20 @@ public class MedicoDBDao extends BaseH2 implements ICrud<Medico>{
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SQLException("Error al leer el médico con ID: " + id, e);
 		}
 		
 		return null;
 	}
 
 	@Override
-	public void eliminar(Integer id) throws IOException, ClassNotFoundException {
+	public void eliminar(Integer id) throws SQLException{
 		String sql = "delete from MEDICO where id = ?";
 		try {
 			updateDeleteInsertSql(sql, id);
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SQLException("Error al eliminar el médico con ID: " + id, e);
 		}
 		
 	}

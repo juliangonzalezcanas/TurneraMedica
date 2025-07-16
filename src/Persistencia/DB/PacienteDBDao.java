@@ -82,7 +82,7 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	}
 
 	@Override
-	public Paciente leer(Integer id) throws IOException, ClassNotFoundException {
+	public Paciente leer(Integer id) throws SQLException {
 
 		String sql = "select * from PACIENTE where id = ?";
 
@@ -93,21 +93,22 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 				super.cerrarConexion();
 				return p;
 			}
+			super.cerrarConexion();
 			
 		} catch (SQLException e) {
-			throw new IOException();
-		}
+			throw new SQLException("Error al leer el paciente con ID: " + id, e);
+		} 
 		return null;
 	}
 
 	@Override
-	public void eliminar(Integer id) throws IOException, ClassNotFoundException {
+	public void eliminar(Integer id) throws SQLException {
 		String sql = "delete from PACIENTE where id = ?";
 		try {
 			updateDeleteInsertSql(sql, id);
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SQLException("Error al eliminar el paciente con ID: " + id, e);
 		}
 		
 	}

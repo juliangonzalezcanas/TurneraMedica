@@ -163,7 +163,7 @@ public class FormularioMedico extends JPanel {
                     LocalDateTime.of(LocalDate.parse(fechaInicio.getText()), LocalTime.MIN),
                     LocalDateTime.of(LocalDate.parse(fechaFin.getText()), LocalTime.MIN),
                     turnos);
-            mostrarInfo("Ganancia: $" + ganancia);
+            mostrarInfo("Ganancia: $" + ganancia + " por " + turnos.size() + " turnos.");
         } catch (Exception e) {
             mostrarError("Error en cálculo: " + e.getMessage());
         }

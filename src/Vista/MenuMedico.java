@@ -10,6 +10,7 @@ public class MenuMedico extends JFrame {
     private JMenu menu;
     private JMenuItem miMedico;
     private JMenuItem miTurno;
+    private JMenuItem miAtencion;
 
     private JPanel contentPanel;
     private CardLayout cardLayout;
@@ -24,9 +25,11 @@ public class MenuMedico extends JFrame {
         menu = new JMenu("Menú");
         miMedico = new JMenuItem("Datos del Médico");
         miTurno = new JMenuItem("Turnos");
+        miAtencion = new JMenuItem("Atencion");
 
         menu.add(miMedico);
         menu.add(miTurno);
+        menu.add(miAtencion);
         menuBar.add(menu);
         setJMenuBar(menuBar);
 
@@ -35,9 +38,11 @@ public class MenuMedico extends JFrame {
 
         contentPanel.add(new FormularioMedico(idMedico), "MEDICO");
         contentPanel.add(new FormularioTurno(false, idMedico), "TURNO");
+        contentPanel.add(new FormularioAtencion(idMedico), "ATENCION");
 
         miMedico.addActionListener(e -> switchPanel("MEDICO"));
         miTurno.addActionListener(e -> switchPanel("TURNO"));
+        miAtencion.addActionListener(e -> switchPanel("ATENCION"));
 
         add(contentPanel, BorderLayout.CENTER);
         switchPanel("MEDICO");

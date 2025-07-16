@@ -1,6 +1,5 @@
 package Persistencia.Archivo;
 
-import java.io.IOException;
 import java.util.List;
 
 import Entidades.Turno;
@@ -30,7 +29,7 @@ public class ArchivoTurnoDao implements ICrud<Turno> {
     }
 
     @Override
-    public Turno leer(Integer id) throws IOException, ClassNotFoundException {
+    public Turno leer(Integer id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'leer'");
     }

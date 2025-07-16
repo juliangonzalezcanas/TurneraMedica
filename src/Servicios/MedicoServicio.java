@@ -1,6 +1,7 @@
 package Servicios;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import Entidades.Medico;
 import Entidades.Turno;
 import Persistencia.ICrud;
 import Persistencia.DB.MedicoDBDao;
+import Servicios.Exceptions.GrabandoMedicoException;
 import Servicios.Exceptions.GrabandoPacienteException;
 import Servicios.Exceptions.LoginExcepcion;
 
@@ -26,14 +28,14 @@ public class MedicoServicio {
         this.persistencia = persistencia;
     }
 
-    public void grabar(Medico m) throws IOException, GrabandoPacienteException {
+    public void grabar(Medico m) throws GrabandoMedicoException {
         try{
             String hashedPasswd = BCrypt.hashpw(m.getPassword(), BCrypt.gensalt());
             m.setPassword(hashedPasswd);
             persistencia.grabar(m);
             
-        } catch (IOException e) {
-            throw new GrabandoPacienteException(); 
+        } catch (SQLException e) {
+            throw new GrabandoMedicoException();
         }
     }
     public int login(){
@@ -55,19 +57,41 @@ public class MedicoServicio {
     public void modificar(Medico m) {
         String hashedPasswd = BCrypt.hashpw(m.getPassword(), BCrypt.gensalt());
         m.setPassword(hashedPasswd);
-        persistencia.modificar(m);
+        try {
+            persistencia.modificar(m);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public List<Medico> leerTodos(){
-        return persistencia.leerTodos();
+        try {
+            return persistencia.leerTodos();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public Medico leerPorId(Integer id) throws ClassNotFoundException, IOException {
-        return persistencia.leer(id);
+    public Medico leerPorId(Integer id)  {
+        try {
+            return persistencia.leer(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public void eliminar(Integer id) throws IOException, ClassNotFoundException {
-        persistencia.eliminar(id);
+    public void eliminar(Integer id) {
+        try {
+            persistencia.eliminar(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public List<Turno> buscarTurnosPorFecha(List<Turno> turnos, LocalDate f) {
