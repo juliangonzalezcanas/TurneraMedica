@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -127,8 +128,8 @@ public class FormularioMedico extends JPanel {
 				precioConsulta.setText(m.getPrecioConsulta().toString());
                 especialidad.setText(m.getEspecialidad());
             }
-        } catch (Exception e) {
-            mostrarError("Error al cargar datos: " + e.getMessage());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar datos del médico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -141,9 +142,13 @@ public class FormularioMedico extends JPanel {
             medicoServicio.modificar(m);
             mostrarInfo("Médico modificado con éxito.");
             cargarTabla();
-        } catch (Exception e) {
-            mostrarError("Error al modificar: " + e.getMessage());
-        }
+        } catch (SQLException | NombreVacioException | ApellidoVacioException |
+                 DniVacioException | EmailVacioException |
+                 ObraSocialVaciaException |
+                 PasswdVacioException | EspecialidadVaciaException |
+                 PrecioConsultaVacioException e) {
+            JOptionPane.showMessageDialog(this, "Error al modificar médico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } 
     }
 
     private void eliminarMedico() {
@@ -151,34 +156,40 @@ public class FormularioMedico extends JPanel {
             medicoServicio.eliminar(idMedico);
             mostrarInfo("Médico eliminado.");
             cargarTabla();
-        } catch (Exception e) {
-            mostrarError("Error al eliminar: " + e.getMessage());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al eliminar médico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void calcularGanancia() {
         try {
+            if(fechaInicio.getText().isEmpty() || fechaFin.getText().isEmpty()){
+                throw new FechaVaciaException();
+            }
             List<Turno> turnos = turnoServicio.buscarPorMedico(idMedico);
             Float ganancia = medicoServicio.calcularGanancia(
                     LocalDateTime.of(LocalDate.parse(fechaInicio.getText()), LocalTime.MIN),
                     LocalDateTime.of(LocalDate.parse(fechaFin.getText()), LocalTime.MIN),
                     turnos);
             mostrarInfo("Ganancia: $" + ganancia + " por " + turnos.size() + " turnos.");
-        } catch (Exception e) {
-            mostrarError("Error en cálculo: " + e.getMessage());
+        } catch (FechaVaciaException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void buscarTurnosPorFecha() {
         try {
+            if(fechaBusqueda.getText().isEmpty()){
+                throw new FechaVaciaException();
+            }
             List<Turno> turnos = medicoServicio.buscarTurnosPorFecha(
                     turnoServicio.buscarPorMedico(idMedico),
                     LocalDate.parse(fechaBusqueda.getText()));
             for (Turno t : turnos) {
                 mostrarInfo("Turno: " + t.getId() + " - Paciente: " + t.getPaciente().getNombre());
             }
-        } catch (Exception e) {
-            mostrarError("Error buscando turnos: " + e.getMessage());
+        } catch (FechaVaciaException e) {
+            JOptionPane.showMessageDialog(this, "Error al buscar turnos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -186,11 +197,9 @@ public class FormularioMedico extends JPanel {
         JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void mostrarError(String mensaje) {
-        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
 
-    private void validarCampos() throws Exception {
+    private void validarCampos() throws NombreVacioException, ApellidoVacioException,
+            DniVacioException, EmailVacioException, ObraSocialVaciaException, PrecioConsultaVacioException, EspecialidadVaciaException, PasswdVacioException {
         if (nombre.getText().isEmpty()) throw new NombreVacioException();
         if (apellido.getText().isEmpty()) throw new ApellidoVacioException();
         if (dni.getText().isEmpty()) throw new DniVacioException();
@@ -198,5 +207,6 @@ public class FormularioMedico extends JPanel {
         if (obraSocial.getText().isEmpty()) throw new ObraSocialVaciaException();
         if (precioConsulta.getText().isEmpty()) throw new PrecioConsultaVacioException();
         if (especialidad.getText().isEmpty()) throw new EspecialidadVaciaException();
+        if (passwd.getText().isEmpty()) throw new PasswdVacioException();
     }
 }

@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import Entidades.Consultorio;
 import Entidades.Medico;
 import Entidades.Paciente;
 import Entidades.Turno;
@@ -37,9 +38,9 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 	@Override
 	public void grabar(Turno entity) {
 
-		String sql = "INSERT INTO TURNO (fecha, valor_final, medico_id, paciente_id) VALUES (?,?,?,?)";
+		String sql = "INSERT INTO TURNO (fecha, valor_final, medico_id, paciente_id, id_consultorio) VALUES (?,?,?,?,?)";
 		try {
-			updateDeleteInsertSql(sql, entity.getFecha(), entity.getPrecioConsulta(), entity.getMedico().getId(), entity.getPaciente().getId());
+			updateDeleteInsertSql(sql, entity.getFecha(), entity.getPrecioConsulta(), entity.getMedico().getId(), entity.getPaciente().getId(), entity.getConsultorio().getId());
 			super.cerrarConexion();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -53,7 +54,7 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 		try {
 			ResultSet rs = super.selectSql(sql);
 			while (rs.next()) {
-				t.add(new Turno(rs.getInt(1), rs.getTimestamp(2).toLocalDateTime(), buscarMedico(rs.getInt(4)), buscarPaciente(rs.getInt(5))));
+				t.add(new Turno(rs.getInt(1), rs.getTimestamp(2).toLocalDateTime(), buscarMedico(rs.getInt(4)), buscarPaciente(rs.getInt(5)), buscarConsultorio(rs.getInt(6))));
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
@@ -68,17 +69,19 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 	public Turno leer(Integer id) throws SQLException {
 
 		String sql = "select * from TURNO where id = ?";
+		Turno t = null;
 
 		try {
 			ResultSet rs = super.selectSql(sql, id);
 			if (rs.first()) {
-				return new Turno(rs.getInt(1), LocalDateTime.ofInstant(rs.getDate(2).toInstant(), ZoneId.systemDefault()), buscarMedico(rs.getInt(3)), buscarPaciente(rs.getInt(4)));
+				t = new Turno(rs.getInt(1), LocalDateTime.ofInstant(rs.getDate(2).toInstant(), ZoneId.systemDefault()), buscarMedico(rs.getInt(3)), buscarPaciente(rs.getInt(4)), buscarConsultorio(rs.getInt(5)));
 			}
 			super.cerrarConexion();
+			return t;
 		} catch (SQLException e) {
 			throw new SQLException("Error al leer el turno con ID: " + id, e);
 		}
-		return null;
+
 	}
 
 	@Override
@@ -114,6 +117,18 @@ public class TurnoDBDao extends BaseH2 implements ICrud<Turno>{
 		super.cerrarConexion();
         return null;
     }
+
+	private Consultorio buscarConsultorio(int id) throws SQLException {
+		String sql = "select * from CONSULTORIO where id = ?";
+		ResultSet rs = super.selectSql(sql, id);
+		if (rs.first()) {
+			Consultorio c = new Consultorio(rs.getInt(1), rs.getString(2), rs.getString(3));
+			super.cerrarConexion();
+			return c;
+		}
+		super.cerrarConexion();
+		return null;
+	}
 
 	public boolean existeTurno(LocalDateTime fechaHora, int medicoId) {
 		String sql = "select * from TURNO where fecha = ? and medico_id = ?";

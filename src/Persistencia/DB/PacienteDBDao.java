@@ -64,7 +64,7 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 	}
 
 
-	public Object[] login(String email) {
+	public Object[] login(String email) throws SQLException {
 		String sql = "select id, password from PACIENTE where mail = ?";
 		int id = -1;
 		String password = null;
@@ -76,7 +76,7 @@ public class PacienteDBDao extends BaseH2 implements ICrud<Paciente> {
 			}
 			super.cerrarConexion();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SQLException();
 		}
 		return  new Object[] {id, password};
 	}

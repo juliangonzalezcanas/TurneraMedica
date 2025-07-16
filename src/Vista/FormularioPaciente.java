@@ -11,14 +11,13 @@ import Entidades.Turno;
 import Servicios.PacienteServicio;
 import Servicios.TurnoServicio;
 import Servicios.Exceptions.EliminandoPacienteException;
-import Servicios.Exceptions.ModificandoPacienteException;
 import Vista.Exceptions.*;
 
 public class FormularioPaciente extends JPanel {
 
     private JTextField nombre, apellido, dni, email, obra_social, passwd;
     private JTable tablaPacientes;
-    private JTextField fechaTurno;
+
 
     private PacienteServicio pacienteServicio;
     private TurnoServicio turnoServicio;
@@ -56,7 +55,6 @@ public class FormularioPaciente extends JPanel {
 
         this.add(formPanel, BorderLayout.NORTH);
 
-        // Botones secundarios
         JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton btnEliminar = new JButton("Eliminar Paciente");
@@ -72,11 +70,8 @@ public class FormularioPaciente extends JPanel {
         // Buscar turnos
         JPanel turnoPanel = new JPanel();
         turnoPanel.setBorder(BorderFactory.createTitledBorder("Turnos"));
-        fechaTurno = new JTextField(10);
         JButton btnBuscarTurnos = new JButton("Buscar Turnos");
         btnBuscarTurnos.addActionListener(e -> buscarTurnos());
-        turnoPanel.add(new JLabel("Fecha (yyyy-MM-dd):"));
-        turnoPanel.add(fechaTurno);
         turnoPanel.add(btnBuscarTurnos);
 
         this.add(turnoPanel, BorderLayout.SOUTH);
@@ -138,7 +133,7 @@ public class FormularioPaciente extends JPanel {
                 sb.append("ID: ").append(t.getId())
                         .append(", Fecha: ").append(t.getFecha())
                         .append(", Médico: ").append(t.getMedico().getNombre())
-                        .append("\n");
+                        .append(", Consultorio: ").append(t.getConsultorio().getNombre()).append(" ").append(t.getConsultorio().getDireccion());
             }
             mostrarInfo(sb.toString());
         } catch (Exception ex) {

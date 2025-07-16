@@ -15,7 +15,7 @@ import Persistencia.ICrud;
 import Persistencia.DB.MedicoDBDao;
 import Servicios.Exceptions.GrabandoMedicoException;
 import Servicios.Exceptions.GrabandoPacienteException;
-import Servicios.Exceptions.LoginExcepcion;
+import Servicios.Exceptions.LoginException;
 
 public class MedicoServicio {
     ICrud<Medico> persistencia;
@@ -43,25 +43,27 @@ public class MedicoServicio {
         return 0;
     }
     
-    public int login(String email, String password) throws LoginExcepcion {
-
-        Object[] info = ((MedicoDBDao) persistencia).login(email);
-        int id = (int) info[0];
-        if (!BCrypt.checkpw(password, (String) info[1])) {
-            throw new LoginExcepcion();
+    public int login(String email, String password) throws LoginException {
+        Object[] info;
+        Integer id = null;
+        try {
+            info = ((MedicoDBDao) persistencia).login(email);
+            BCrypt.checkpw(password, (String) info[1]);
+            id = (int) info[0];
+        } catch (SQLException | NullPointerException e) {
+            throw new LoginException();
         }
         
         return id;
     }
 
-    public void modificar(Medico m) {
+    public void modificar(Medico m) throws SQLException {
         String hashedPasswd = BCrypt.hashpw(m.getPassword(), BCrypt.gensalt());
         m.setPassword(hashedPasswd);
         try {
             persistencia.modificar(m);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SQLException();
         }
     }
 
@@ -75,22 +77,19 @@ public class MedicoServicio {
         return null;
     }
 
-    public Medico leerPorId(Integer id)  {
+    public Medico leerPorId(Integer id) throws SQLException  {
         try {
             return persistencia.leer(id);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SQLException();
         }
-        return null;
     }
 
-    public void eliminar(Integer id) {
+    public void eliminar(Integer id) throws SQLException {
         try {
             persistencia.eliminar(id);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SQLException();
         }
     }
 

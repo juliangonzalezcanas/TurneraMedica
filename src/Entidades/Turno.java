@@ -10,20 +10,22 @@ public class Turno {
     private Consultorio consultorio;
 
 
-    public Turno(Integer id, LocalDateTime fechaHora, Medico medico, Paciente paciente) {
+    public Turno(Integer id, LocalDateTime fechaHora, Medico medico, Paciente paciente, Consultorio consultorio) {
         this.id = id;
         this.fechaHora = fechaHora;
         this.medico = medico;
         this.paciente = paciente;
         this.precioConsulta = calcularPrecioConsulta();
+        this.consultorio = consultorio;
     }
 
-    public Turno( LocalDateTime fechaHora, Medico medico, Paciente paciente) {
+    public Turno( LocalDateTime fechaHora, Medico medico, Paciente paciente, Consultorio consultorio) {
         this.id = null;
         this.fechaHora = fechaHora;
         this.medico = medico;
         this.paciente = paciente;
         this.precioConsulta = calcularPrecioConsulta();
+        this.consultorio = consultorio;
     }
 
     public LocalDateTime getFecha() {

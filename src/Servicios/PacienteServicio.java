@@ -11,10 +11,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import Entidades.Paciente;
 import Entidades.Turno;
 import Persistencia.ICrud;
+import Persistencia.DB.MedicoDBDao;
 import Persistencia.DB.PacienteDBDao;
 import Servicios.Exceptions.EliminandoPacienteException;
 import Servicios.Exceptions.GrabandoPacienteException;
-import Servicios.Exceptions.LoginExcepcion;
+import Servicios.Exceptions.LoginException;
 import Servicios.Exceptions.ModificandoPacienteException;
 
 public class PacienteServicio {
@@ -28,7 +29,7 @@ public class PacienteServicio {
         this.persistencia = persistencia;
     }
 
-    public void grabar(Paciente p) throws IOException, GrabandoPacienteException {
+    public void grabar(Paciente p) throws GrabandoPacienteException {
         try{
             String hashedPasswd = BCrypt.hashpw(p.getPassword(), BCrypt.gensalt());
             p.setPassword(hashedPasswd);
@@ -49,11 +50,15 @@ public class PacienteServicio {
         
     }
 
-    public int login(String email, String password) throws LoginExcepcion {
-        Object[] info = ((PacienteDBDao) persistencia).login(email);
-        int id = (int) info[0];
-        if (!BCrypt.checkpw(password, (String) info[1])) {
-            throw new LoginExcepcion();
+    public int login(String email, String password) throws LoginException {
+        Object[] info;
+        Integer id = null;
+        try {
+            info = ((PacienteDBDao) persistencia).login(email);
+            BCrypt.checkpw(password, (String) info[1]);
+            id = (int) info[0];
+        } catch (SQLException | NullPointerException e) {
+            throw new LoginException();
         }
         
         return id;

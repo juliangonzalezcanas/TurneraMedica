@@ -3,6 +3,7 @@ package Persistencia.DB;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import Entidades.Atencion;
@@ -111,5 +112,21 @@ public class AtencionDBDao extends BaseH2 implements ICrud<Atencion> {
         }
 		super.cerrarConexion();
         return null;
+    }
+
+    public List<Atencion> leerPorMedico(int idMedico) throws SQLException {
+        String sql = "SELECT * FROM ATENCION WHERE id_medico=?";
+        List<Atencion> atenciones = new ArrayList<>();
+        try {
+            ResultSet rs = super.selectSql(sql, idMedico);
+            while (rs.next()) {
+                Atencion a = new Atencion(rs.getInt(1), buscarMedico(rs.getInt(2)), buscarConsultorio(rs.getInt(3)), rs.getTimestamp(4).toLocalDateTime().toLocalDate(), rs.getTimestamp(5).toLocalDateTime().toLocalDate());
+                atenciones.add(a);
+            }
+            super.cerrarConexion();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return atenciones;
     }
 }

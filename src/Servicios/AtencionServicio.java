@@ -1,8 +1,10 @@
 package Servicios;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 import Entidades.Atencion;
+import Entidades.Consultorio;
 import Persistencia.ICrud;
 import Persistencia.DB.AtencionDBDao;
 public class AtencionServicio {
@@ -53,6 +55,30 @@ public class AtencionServicio {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Atencion> leerPorMedico(int idMedico) {
+        try {
+            return ((AtencionDBDao) persistencia).leerPorMedico(idMedico);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Consultorio buscarConsultorioPorMedico(int idMedico, LocalDate fecha) {
+        try {
+            List<Atencion> atenciones = leerPorMedico(idMedico);
+            for (Atencion atencion : atenciones) {
+                if ((fecha.isAfter(atencion.getDesde()) || fecha.isEqual(atencion.getDesde())) && (fecha.isBefore(atencion.getHasta()) || fecha.isEqual(atencion.getHasta()))) {
+                    return atencion.getConsultorio();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
         

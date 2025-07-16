@@ -6,12 +6,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import Entidades.Medico;
 import Entidades.Turno;
 import Persistencia.ICrud;
 import Persistencia.DB.TurnoDBDao;
-import Servicios.Exceptions.GrabandoPacienteException;
 
 public class TurnoServicio {
     ICrud<Turno> persistencia;
@@ -111,6 +113,19 @@ public class TurnoServicio {
     public boolean estaOcupado(LocalDateTime fechaHora, int medicoId) {
         return ((TurnoDBDao) persistencia).existeTurno(fechaHora, medicoId);
     }
+
+    public List<Turno> calcularRecaudaciones(LocalDate desde, LocalDate hasta) {
+        List<Turno> turnos = ((TurnoDBDao) persistencia).leerTodos(); 
+        List<Turno> recaudaciones = new ArrayList<>();
+        for (Turno t : turnos) {
+            LocalDate fecha = t.getFecha().toLocalDate();
+            if (!fecha.isBefore(desde) && !fecha.isAfter(hasta)) {
+                recaudaciones.add(t);
+            }
+        }
+        return recaudaciones;
+    }
+
 
 
 }

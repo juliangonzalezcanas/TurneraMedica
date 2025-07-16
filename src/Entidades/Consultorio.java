@@ -1,7 +1,7 @@
 package Entidades;
 
 public class Consultorio {
-    private int id;
+    private Integer id;
     private String nombre;
     private String direccion;
 
@@ -11,9 +11,19 @@ public class Consultorio {
         this.direccion = direccion;
     }
 
+    public Consultorio(String nombre, String direccion) {
+        this.id = null;
+        this.nombre = nombre;
+        this.direccion = direccion;
+    }
+
     public int getId() { return id; }
     public String getNombre() { return nombre; }
     public String getDireccion() { return direccion; }
+
+    public void setId(int id) { this.id = id; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
 
     @Override
     public String toString() {

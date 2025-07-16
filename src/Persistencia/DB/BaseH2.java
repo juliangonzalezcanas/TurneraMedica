@@ -1,16 +1,15 @@
 package Persistencia.DB;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import Entidades.Paciente;
 
 public abstract class BaseH2 {
 	
@@ -118,6 +117,7 @@ public abstract class BaseH2 {
             	case Long    p -> s.setLong(i++, p);
 				case Float   p -> s.setFloat(i++, p);
 				case LocalDateTime p -> s.setTimestamp(i++, Timestamp.valueOf((LocalDateTime) param));
+				case LocalDate p -> s.setDate(i++, Date.valueOf((LocalDate) param));
             	default      -> throw new IllegalArgumentException("Unexpected value: " + param);
         	}
     	}

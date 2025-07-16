@@ -10,9 +10,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import Entidades.Atencion;
 import Entidades.Medico;
 import Entidades.Paciente;
 import Entidades.Turno;
+import Servicios.AtencionServicio;
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
 import Servicios.TurnoServicio;
@@ -30,6 +32,8 @@ public class FormularioTurno extends JPanel {
     private TurnoServicio turnoServicio;
     private MedicoServicio medicoServicio;
     private PacienteServicio pacienteServicio;
+    private AtencionServicio atencionServicio;
+
 
     public FormularioTurno(boolean esPaciente, int idUsuario) {
         this.esPaciente = esPaciente;
@@ -40,6 +44,7 @@ public class FormularioTurno extends JPanel {
         turnoServicio = new TurnoServicio();
         medicoServicio = new MedicoServicio();
         pacienteServicio = new PacienteServicio();
+        atencionServicio = new AtencionServicio();
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         crearBotonSwitch(topPanel);
@@ -100,7 +105,7 @@ public class FormularioTurno extends JPanel {
                 try {
                     turnoServicio.eliminar(turnoSeleccionado.getId());
                     JOptionPane.showMessageDialog(this, "Turno eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                    comboTurnos.removeItem(turnoSeleccionado); // actualizamos la vista
+                    comboTurnos.removeItem(turnoSeleccionado); 
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Error al eliminar turno: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -119,7 +124,11 @@ public class FormularioTurno extends JPanel {
         comboEntidad.removeAllItems();
         if (esPaciente) {
             List<Medico> medicos = medicoServicio.leerTodos();
-            for (Medico m : medicos) comboEntidad.addItem(m);
+            for (Medico m : medicos){
+                if(!(m.getId() == -1)){
+                    comboEntidad.addItem(m);
+                }
+            }
         } else {
             List<Paciente> pacientes = pacienteServicio.leerTodos();
             for (Paciente p : pacientes) comboEntidad.addItem(p);
@@ -139,14 +148,27 @@ public class FormularioTurno extends JPanel {
 
         try {
             LocalDate f = LocalDate.parse(fecha.getText());
-            List<LocalDateTime> horarios = turnoServicio.generarHorariosDisponibles(f, medico.getId());
+            List<LocalDateTime> horarios = null;
+            Atencion atencion = null;
+            if (f.isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "La fecha no puede ser anterior a hoy.");
+            } else {
+                List<Atencion> aMedico = atencionServicio.leerPorMedico(medico.getId());
+                for(Atencion a : aMedico) {
+                    if ((a.getDesde().isBefore(f) || a.getDesde().isEqual(f)) && (a.getHasta().isAfter(f) || a.getHasta().isEqual(f))) {
+                        horarios = turnoServicio.generarHorariosDisponibles(f, medico.getId());
+                        atencion = a;
+                    }
 
-            if (horarios.isEmpty()) {
+                }
+            }
+
+            if (horarios == null || horarios.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No hay horarios disponibles.");
             } else {
                 for (LocalDateTime horario : horarios) {
                     String horarioFormateado = String.format("%tF %tR", horario, horario);
-                    comboHorarios.addItem(horarioFormateado);
+                    comboHorarios.addItem(horarioFormateado + " - " + atencion.getConsultorio());
                 }
             }
         } catch (Exception e) {
@@ -175,16 +197,18 @@ public class FormularioTurno extends JPanel {
         boton.addActionListener(e -> {
             try {
                 String seleccionado = (String) comboHorarios.getSelectedItem();
-                LocalDateTime horarioSeleccionado = LocalDateTime.parse(seleccionado, formatter);
+                LocalDateTime horarioSeleccionado = LocalDateTime.parse(seleccionado.split(" ")[0] + " " + seleccionado.split(" ")[1], formatter);
                 Turno t;
                 if (esPaciente) {
                     Medico m = (Medico) comboEntidad.getSelectedItem();
                     Paciente p = pacienteServicio.leer(idUsuario);
-                    t = new Turno(horarioSeleccionado, m, p);
+                    t = new Turno(horarioSeleccionado, m, p, atencionServicio.buscarConsultorioPorMedico(m.getId(), horarioSeleccionado.toLocalDate()));
+                    cargarTurnosUsuario();
                 } else {
                     Paciente p = (Paciente) comboEntidad.getSelectedItem();
                     Medico m = medicoServicio.leerPorId(idUsuario);
-                    t = new Turno(horarioSeleccionado, m, p);
+                    t = new Turno(horarioSeleccionado, m, p, atencionServicio.buscarConsultorioPorMedico(idUsuario, horarioSeleccionado.toLocalDate()));
+                    cargarTurnosUsuario();
                 }
                 turnoServicio.grabar(t);
                 JOptionPane.showMessageDialog(this, "Turno agregado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);

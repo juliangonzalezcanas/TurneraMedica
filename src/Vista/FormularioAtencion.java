@@ -5,10 +5,12 @@ import Entidades.Consultorio;
 import Servicios.AtencionServicio;
 import Servicios.ConsultorioServicio;
 import Servicios.MedicoServicio;
+import Vista.Exceptions.FechaVaciaException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -66,6 +68,11 @@ private JComboBox<Consultorio> comboConsultorios;
     private void registrarAtencion() {
         try {
             Consultorio consultorio = (Consultorio) comboConsultorios.getSelectedItem();
+
+            if(fechaDesde.getText().isEmpty() || fechaHasta.getText().isEmpty()) {
+                throw new FechaVaciaException();
+            }
+
             LocalDate desde = LocalDate.parse(fechaDesde.getText());
             LocalDate hasta = LocalDate.parse(fechaHasta.getText());
 
@@ -88,9 +95,11 @@ private JComboBox<Consultorio> comboConsultorios;
             fechaDesde.setText("");
             fechaHasta.setText("");
 
-        } catch (Exception e) {
+        } catch (FechaVaciaException e) {
             JOptionPane.showMessageDialog(this, "Error al registrar atención: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al registrar atención: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

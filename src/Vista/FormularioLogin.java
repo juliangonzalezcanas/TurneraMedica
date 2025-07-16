@@ -5,7 +5,7 @@ import java.awt.*;
 
 import Servicios.MedicoServicio;
 import Servicios.PacienteServicio;
-import Servicios.Exceptions.LoginExcepcion;
+import Servicios.Exceptions.LoginException;
 
 public class FormularioLogin extends JFrame {
 
@@ -85,17 +85,29 @@ public class FormularioLogin extends JFrame {
             String correo = email.getText();
             String clave = new String(passwd.getPassword());
 
-            if (botonToggle.isSelected()) { // Médico
+            if (correo.isEmpty() || clave.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                throw new LoginException("Campos incompletos");
+            }
+
+            if (botonToggle.isSelected()) { 
                 int idMedico = medicoServicio.login(correo, clave);
-                MenuMedico menu = new MenuMedico(idMedico);
-                menu.setVisible(true);
-            } else { // Paciente
+                if (idMedico == -1) {
+                    FormularioAdministrador admin = new FormularioAdministrador();
+                    admin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    admin.setSize(600, 500); 
+                    admin.setVisible(true);
+                } else {
+                    MenuMedico menu = new MenuMedico(idMedico);
+                    menu.setVisible(true);
+                }
+            } else { 
                 int idPaciente = pacienteServicio.login(correo, clave);
                 MenuPaciente menu = new MenuPaciente(idPaciente);
                 menu.setVisible(true);
             }
-            this.dispose(); // Cierra login
-        } catch (LoginExcepcion e) {
+            this.dispose(); 
+        } catch (LoginException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
